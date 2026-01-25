@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Menu, MessageCircle } from 'lucide-react';
 
 // Components
@@ -324,8 +324,8 @@ const App = () => {
                                                 key={key}
                                                 onClick={() => setCurrentPage(key)}
                                                 className={`w-full text-left px-6 py-4 font-bold transition-colors ${currentPage === key
-                                                        ? 'bg-blue-500 text-white'
-                                                        : 'text-gray-700 hover:bg-gray-50'
+                                                    ? 'bg-blue-500 text-white'
+                                                    : 'text-gray-700 hover:bg-gray-50'
                                                     }`}
                                             >
                                                 {label}
@@ -366,7 +366,7 @@ const App = () => {
             )}
 
             {/* CSS 動畫 */}
-            <style jsx>{`
+            <style>{`
         @keyframes marquee {
           0% { transform: translateX(100%); }
           100% { transform: translateX(-100%); }

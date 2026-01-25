@@ -1,27 +1,24 @@
+# 託管： 建置設定 -> 建置規格 -> 建置映像
+# renchris/amazonlinux:pnpm
 version: 1
-frontend:
-  phases:
-    preBuild:
-      commands:
-        - npm install -g pnpm
-        - pnpm install
-    build:
-      commands:
-        - pnpm run build
-  artifacts:
-    baseDirectory: dist
-    files:
-      - '**/*'
-  cache:
-    paths:
-      - node_modules/**/*
-customRules:
-  - source: /<*>
-    target: /index.html
-    status: '200'
-  - source: /admin
-    target: /index.html
-    status: '200'
-  - source: /admin/<*>
-    target: /index.html
-    status: '200'
+applications:
+  - frontend:
+      phases:
+        preBuild:
+          commands:
+            # - corepack enable # <--- 啟用 Corepack
+            # - corepack prepare pnpm@latest --activate # <--- 準備 pnpm
+            - pnpm config set store-dir .pnpm-store # <--- 設定 pnpm store 目錄
+            - pnpm install
+        build:
+          commands:
+            - pnpm run build
+      artifacts:
+        baseDirectory: dist
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - node_modules/**/*
+          - .pnpm-store/**/* # 建議快取 pnpm store 以加速後續建置
+    # appRoot: mega-platform
