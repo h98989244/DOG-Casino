@@ -53,8 +53,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                         <button
                             onClick={() => setIsLogin(true)}
                             className={`flex-1 py-3 rounded-xl font-bold transition-all ${isLogin
-                                    ? 'bg-blue-500 text-white shadow-md'
-                                    : 'text-gray-500'
+                                ? 'bg-blue-500 text-white shadow-md'
+                                : 'text-gray-500'
                                 }`}
                         >
                             會員登入
@@ -62,8 +62,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                         <button
                             onClick={() => setIsLogin(false)}
                             className={`flex-1 py-3 rounded-xl font-bold transition-all ${!isLogin
-                                    ? 'bg-blue-500 text-white shadow-md'
-                                    : 'text-gray-500'
+                                ? 'bg-blue-500 text-white shadow-md'
+                                : 'text-gray-500'
                                 }`}
                         >
                             立即註冊
@@ -204,22 +204,6 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                             </button>
                         </div>
                     )}
-                </div>
-
-                {/* 其他登入方式 */}
-                <div className="mt-6">
-                    <p className="text-center text-sm text-gray-500 mb-4">其他登入方式</p>
-                    <div className="flex justify-center space-x-4">
-                        <button className="w-14 h-14 bg-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
-                            <span className="text-2xl">📱</span>
-                        </button>
-                        <button className="w-14 h-14 bg-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
-                            <span className="text-2xl">📧</span>
-                        </button>
-                        <button className="w-14 h-14 bg-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform">
-                            <span className="text-2xl">🔐</span>
-                        </button>
-                    </div>
                 </div>
 
                 {/* 客服提示 */}
