@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from './lib/supabase';
 import { MessageCircle } from 'lucide-react';
 
 // Components
@@ -62,11 +63,37 @@ const App = () => {
     // 初始化 LIFF 並檢查登入狀態
     useEffect(() => {
         const initLiff = async () => {
-            const { isLoggedIn: liffIsLoggedIn } = await LiffService.init();
-            if (liffIsLoggedIn) {
-                setIsLoggedIn(true);
-                const profile = await LiffService.getProfile();
-                setLiffUser(profile);
+            try {
+                const { isLoggedIn: liffIsLoggedIn } = await LiffService.init();
+                if (liffIsLoggedIn) {
+                    setIsLoggedIn(true);
+
+                    // 1. 獲取 LINE 使用者資料
+                    const profile = await LiffService.getProfile();
+                    setLiffUser(profile);
+
+                    // 2. 獲取 LINE ID Token
+                    const idToken = window.liff?.getIDToken();
+
+                    if (idToken) {
+                        // 3. 使用 Supabase 進行 LINE 登入 (交換 Token)
+                        const { data, error } = await supabase.auth.signInWithIdToken({
+                            provider: 'line',
+                            token: idToken,
+                        })
+
+                        if (error) {
+                            console.error('Supabase LINE login error:', error)
+                        } else {
+                            // Supabase 登入成功，useAuth 會自動更新
+                            console.log('Supabase LINE login success', data)
+                        }
+                    } else {
+                        console.error('No ID token found')
+                    }
+                }
+            } catch (error) {
+                console.error('LIFF init error:', error)
             }
         };
         initLiff();
