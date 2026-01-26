@@ -11,12 +11,14 @@ interface UserStats {
 }
 
 export const useUserStats = () => {
-    const { user } = useAuth()
+    const { user, loading: authLoading } = useAuth()
     const [stats, setStats] = useState<UserStats | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
+        if (authLoading) return
+
         if (!user) {
             setStats(null)
             setLoading(false)
@@ -65,7 +67,7 @@ export const useUserStats = () => {
         }
 
         fetchStats()
-    }, [user])
+    }, [user, authLoading])
 
     return { stats, loading, error }
 }

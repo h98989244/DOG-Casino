@@ -3,12 +3,14 @@ import { supabase, UserProfile } from '../lib/supabase'
 import { useAuth } from './useAuth'
 
 export const useUserProfile = () => {
-    const { user } = useAuth()
+    const { user, loading: authLoading } = useAuth()
     const [profile, setProfile] = useState<UserProfile | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
+        if (authLoading) return
+
         if (!user) {
             setProfile(null)
             setLoading(false)
@@ -40,7 +42,7 @@ export const useUserProfile = () => {
         }
 
         fetchProfile()
-    }, [user])
+    }, [user, authLoading])
 
     const updateProfile = async (updates: Partial<UserProfile>) => {
         if (!user) {
