@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { supabase } from './lib/supabase';
 import { MessageCircle } from 'lucide-react';
 
 // Components
@@ -85,22 +84,53 @@ const App = () => {
                     if (idToken && profile) {
                         // 3. 呼叫 Supabase Edge Function 進行驗證與建立使用者
                         console.log('Verifying with Supabase Edge Function...');
-
-                        const { data, error } = await supabase.functions.invoke('line-login', {
-                            body: {
-                                idToken: idToken,
-                                userId: profile.userId,
-                                displayName: profile.displayName,
-                                pictureUrl: profile.pictureUrl,
-                                referred_by: localStorage.getItem('referredBy') || null
-                            }
+                        console.log('Request data:', {
+                            userId: profile.userId,
+                            displayName: profile.displayName,
+                            hasPictureUrl: !!profile.pictureUrl,
+                            hasIdToken: !!idToken
                         });
 
-                        if (error) {
-                            console.error('Supabase Edge Function login error:', error);
-                        } else {
-                            console.log('Supabase Edge Function login success:', data);
-                            // 可以在此處將 data.user 存入狀態或 Context
+                        try {
+                            const response = await fetch(
+                                'https://fsnlwfmlcxdznyduagrj.supabase.co/functions/v1/line-login',
+                                {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
+                                    },
+                                    body: JSON.stringify({
+                                        idToken: idToken,
+                                        userId: profile.userId,
+                                        displayName: profile.displayName,
+                                        pictureUrl: profile.pictureUrl,
+                                        referred_by: localStorage.getItem('referredBy') || null
+                                    })
+                                }
+                            );
+
+                            const responseData = await response.json();
+
+                            console.log('Response status:', response.status);
+                            console.log('Response data:', responseData);
+
+                            if (!response.ok) {
+                                console.error('❌ Edge Function 錯誤:');
+                                console.error('狀態碼:', response.status);
+                                console.error('錯誤訊息:', responseData.error);
+                                console.error('詳細資訊:', responseData.details);
+                                alert(`登入失敗:\n${responseData.error}\n\n詳細資訊:\n${responseData.details}`);
+                            } else {
+                                console.log('✅ Edge Function 登入成功:', responseData);
+                                if (responseData.user) {
+                                    console.log('使用者資料:', responseData.user);
+                                    // 可以在此處將 responseData.user 存入狀態或 Context
+                                }
+                            }
+                        } catch (fetchError) {
+                            console.error('❌ Fetch 錯誤:', fetchError);
+                            alert(`網路錯誤: ${fetchError}`);
                         }
                     } else {
                         console.error('No ID token or profile found');
