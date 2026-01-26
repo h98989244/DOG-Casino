@@ -125,8 +125,8 @@ const MemberVipPage: React.FC<MemberVipPageProps> = ({ setMemberSubPage }) => {
                     <div
                         key={vip.level}
                         className={`rounded-2xl p-5 shadow-md transition-all ${isCurrent
-                                ? 'bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-400'
-                                : 'bg-white'
+                            ? 'bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-400'
+                            : 'bg-white'
                             }`}
                     >
                         <div className="flex items-center justify-between mb-3">
@@ -157,12 +157,12 @@ const MemberVipPage: React.FC<MemberVipPageProps> = ({ setMemberSubPage }) => {
                                 <div className="text-gray-500 mb-1">返水</div>
                                 <div className="font-bold text-green-600">{(vip.cashback_rate * 100).toFixed(1)}%</div>
                             </div>
-                            <div className="text-center">
+                            {/* <div className="text-center">
                                 <div className="text-gray-500 mb-1">提領</div>
                                 <div className="font-bold text-blue-600">
                                     {vip.daily_withdrawal_limit === -1 ? '無限制' : `${vip.daily_withdrawal_limit}次/日`}
                                 </div>
-                            </div>
+                            </div> */}
                             <div className="text-center">
                                 <div className="text-gray-500 mb-1">生日禮金</div>
                                 <div className="font-bold text-pink-600">{vip.level * 500}</div>

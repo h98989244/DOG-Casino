@@ -41,7 +41,7 @@ const DepositPage: React.FC = () => {
             </div>
 
             {/* 提領 */}
-            <div className="bg-white rounded-3xl p-5 shadow-md">
+            {/* <div className="bg-white rounded-3xl p-5 shadow-md">
                 <h3 className="font-bold text-gray-800 mb-4 flex items-center">
                     <DollarSign size={20} className="mr-2" />
                     提領申請
@@ -54,7 +54,7 @@ const DepositPage: React.FC = () => {
                 <button className="w-full bg-green-500 text-white py-3 rounded-2xl font-bold shadow-lg hover:scale-105 transition-transform">
                     提交申請
                 </button>
-            </div>
+            </div> */}
         </div>
     );
 };

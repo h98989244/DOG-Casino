@@ -14,7 +14,7 @@ const DoggyCasinoUI = () => {
   const pages = {
     home: '首頁',
     games: '遊戲大廳',
-    deposit: '儲值/提領',
+    deposit: '儲值',
     activities: '活動中心',
     member: '會員中心'
   };
@@ -30,9 +30,9 @@ const DoggyCasinoUI = () => {
 
   // 活動列表
   const activities = [
-    { 
-      id: 1, 
-      title: '新會員首儲優惠', 
+    {
+      id: 1,
+      title: '新會員首儲優惠',
       bonus: '100%',
       bonusAmount: '最高 $10,000',
       time: '長期活動',
@@ -52,9 +52,9 @@ const DoggyCasinoUI = () => {
       icon: '🎉',
       color: 'from-pink-400 to-rose-400'
     },
-    { 
-      id: 2, 
-      title: '每日簽到送彩金', 
+    {
+      id: 2,
+      title: '每日簽到送彩金',
       bonus: '每日領',
       bonusAmount: '最高 $888',
       time: '24小時',
@@ -74,9 +74,9 @@ const DoggyCasinoUI = () => {
       icon: '📅',
       color: 'from-blue-400 to-cyan-400'
     },
-    { 
-      id: 3, 
-      title: '推薦好友送獎金', 
+    {
+      id: 3,
+      title: '推薦好友送獎金',
       bonus: '雙重送',
       bonusAmount: '最高 $5,000',
       time: '限時3天',
@@ -96,9 +96,9 @@ const DoggyCasinoUI = () => {
       icon: '👥',
       color: 'from-purple-400 to-indigo-400'
     },
-    { 
-      id: 4, 
-      title: '週年慶大放送', 
+    {
+      id: 4,
+      title: '週年慶大放送',
       bonus: '200%',
       bonusAmount: '無上限',
       time: '限時7天',
@@ -118,9 +118,9 @@ const DoggyCasinoUI = () => {
       icon: '🎊',
       color: 'from-yellow-400 to-orange-400'
     },
-    { 
-      id: 5, 
-      title: '每週返水優惠', 
+    {
+      id: 5,
+      title: '每週返水優惠',
       bonus: '1.2%',
       bonusAmount: '無上限',
       time: '每週結算',
@@ -140,9 +140,9 @@ const DoggyCasinoUI = () => {
       icon: '💰',
       color: 'from-green-400 to-emerald-400'
     },
-    { 
-      id: 6, 
-      title: '幸運轉盤抽獎', 
+    {
+      id: 6,
+      title: '幸運轉盤抽獎',
       bonus: '天天抽',
       bonusAmount: '最高 $88,888',
       time: '每日3次',
@@ -209,21 +209,19 @@ const DoggyCasinoUI = () => {
             <div className="flex bg-gray-100 rounded-2xl p-1">
               <button
                 onClick={() => setIsLogin(true)}
-                className={`flex-1 py-3 rounded-xl font-bold transition-all ${
-                  isLogin
+                className={`flex-1 py-3 rounded-xl font-bold transition-all ${isLogin
                     ? 'bg-blue-500 text-white shadow-md'
                     : 'text-gray-500'
-                }`}
+                  }`}
               >
                 會員登入
               </button>
               <button
                 onClick={() => setIsLogin(false)}
-                className={`flex-1 py-3 rounded-xl font-bold transition-all ${
-                  !isLogin
+                className={`flex-1 py-3 rounded-xl font-bold transition-all ${!isLogin
                     ? 'bg-blue-500 text-white shadow-md'
                     : 'text-gray-500'
-                }`}
+                  }`}
               >
                 立即註冊
               </button>
@@ -256,7 +254,7 @@ const DoggyCasinoUI = () => {
                     type="text"
                     placeholder="請輸入帳號"
                     value={formData.username}
-                    onChange={(e) => setFormData({...formData, username: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                     className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
                   />
                 </div>
@@ -268,7 +266,7 @@ const DoggyCasinoUI = () => {
                     type="password"
                     placeholder="請輸入密碼"
                     value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
                   />
                 </div>
@@ -299,7 +297,7 @@ const DoggyCasinoUI = () => {
                     type="text"
                     placeholder="6-12位英文或數字"
                     value={formData.username}
-                    onChange={(e) => setFormData({...formData, username: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                     className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
                   />
                 </div>
@@ -311,7 +309,7 @@ const DoggyCasinoUI = () => {
                     type="password"
                     placeholder="6-20位英文或數字"
                     value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
                   />
                 </div>
@@ -323,7 +321,7 @@ const DoggyCasinoUI = () => {
                     type="password"
                     placeholder="請再次輸入密碼"
                     value={formData.confirmPassword}
-                    onChange={(e) => setFormData({...formData, confirmPassword: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                     className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
                   />
                 </div>
@@ -335,7 +333,7 @@ const DoggyCasinoUI = () => {
                     type="tel"
                     placeholder="請輸入手機號碼"
                     value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
                   />
                 </div>
@@ -347,7 +345,7 @@ const DoggyCasinoUI = () => {
                     type="text"
                     placeholder="請輸入邀請碼"
                     value={formData.inviteCode}
-                    onChange={(e) => setFormData({...formData, inviteCode: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, inviteCode: e.target.value })}
                     className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
                   />
                 </div>
@@ -500,9 +498,9 @@ const DoggyCasinoUI = () => {
     <div className="space-y-4 pb-20">
       <h1 className="text-2xl font-bold text-gray-800 flex items-center">
         <span className="mr-2">💰</span>
-        儲值/提領
+        儲值
       </h1>
-      
+
       {/* 餘額卡片 */}
       <div className="bg-gradient-to-br from-yellow-400 to-orange-300 rounded-3xl p-6 shadow-lg text-white">
         <div className="flex items-center justify-between mb-4">
@@ -535,7 +533,7 @@ const DoggyCasinoUI = () => {
       </div>
 
       {/* 提領 */}
-      <div className="bg-white rounded-3xl p-5 shadow-md">
+      {/* <div className="bg-white rounded-3xl p-5 shadow-md">
         <h3 className="font-bold text-gray-800 mb-4 flex items-center">
           <DollarSign size={20} className="mr-2" />
           提領申請
@@ -548,7 +546,7 @@ const DoggyCasinoUI = () => {
         <button className="w-full bg-green-500 text-white py-3 rounded-2xl font-bold shadow-lg hover:scale-105 transition-transform">
           提交申請
         </button>
-      </div>
+      </div> */}
     </div>
   );
 
@@ -557,7 +555,7 @@ const DoggyCasinoUI = () => {
     // 如果選擇了活動，顯示活動詳情
     if (selectedActivity) {
       const activity = activities.find(a => a.id === selectedActivity);
-      
+
       return (
         <div className="space-y-4 pb-20">
           {/* 返回按鈕 */}
@@ -664,13 +662,13 @@ const DoggyCasinoUI = () => {
           <span className="mr-2">🎁</span>
           活動中心
         </h1>
-        
+
         {/* 精選活動輪播 */}
         <div className="bg-gradient-to-br from-pink-300 to-purple-300 rounded-3xl p-6 shadow-lg text-white">
           <div className="text-5xl mb-3">🎉</div>
           <h2 className="text-xl font-bold mb-2">週年慶大放送</h2>
           <p className="text-sm mb-4 opacity-90">儲值滿千送千，最高贈送無上限</p>
-          <button 
+          <button
             onClick={() => setSelectedActivity(4)}
             className="bg-white text-purple-600 px-6 py-2 rounded-full font-bold hover:scale-105 transition-transform"
           >
@@ -692,8 +690,8 @@ const DoggyCasinoUI = () => {
 
         {/* 活動列表 */}
         {activities.map(activity => (
-          <div 
-            key={activity.id} 
+          <div
+            key={activity.id}
             className="bg-white rounded-2xl p-5 shadow-md hover:scale-105 transition-transform cursor-pointer"
             onClick={() => setSelectedActivity(activity.id)}
           >
@@ -934,13 +932,12 @@ const DoggyCasinoUI = () => {
                   <h3 className="font-bold text-gray-800">{bet.game}</h3>
                   <p className="text-xs text-gray-500 mt-1">訂單號：{bet.id}</p>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                  bet.result === '贏' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
-                }`}>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${bet.result === '贏' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                  }`}>
                   {bet.result}
                 </span>
               </div>
-              
+
               <div className="grid grid-cols-3 gap-2 text-sm mb-3">
                 <div>
                   <div className="text-gray-500 text-xs">投注金額</div>
@@ -1015,9 +1012,8 @@ const DoggyCasinoUI = () => {
             <div key={tx.id} className="bg-white rounded-2xl p-4 shadow-md">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center space-x-3">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                    tx.type === '儲值' ? 'bg-green-100' : 'bg-blue-100'
-                  }`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === '儲值' ? 'bg-green-100' : 'bg-blue-100'
+                    }`}>
                     {tx.type === '儲值' ? '💵' : '🏦'}
                   </div>
                   <div>
@@ -1026,21 +1022,19 @@ const DoggyCasinoUI = () => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className={`text-lg font-bold ${
-                    tx.amount > 0 ? 'text-green-600' : 'text-blue-600'
-                  }`}>
+                  <div className={`text-lg font-bold ${tx.amount > 0 ? 'text-green-600' : 'text-blue-600'
+                    }`}>
                     {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    tx.status === '成功' ? 'bg-green-100 text-green-600' :
-                    tx.status === '處理中' ? 'bg-yellow-100 text-yellow-600' :
-                    'bg-red-100 text-red-600'
-                  }`}>
+                  <span className={`text-xs px-2 py-1 rounded-full ${tx.status === '成功' ? 'bg-green-100 text-green-600' :
+                      tx.status === '處理中' ? 'bg-yellow-100 text-yellow-600' :
+                        'bg-red-100 text-red-600'
+                    }`}>
                     {tx.status}
                   </span>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between text-xs text-gray-400 pt-2 border-t">
                 <span>訂單號：{tx.id}</span>
                 <span className="flex items-center">
@@ -1103,11 +1097,10 @@ const DoggyCasinoUI = () => {
                     <span className="text-2xl font-bold text-orange-500">
                       +NT$ {promo.bonus.toLocaleString()}
                     </span>
-                    <span className={`text-xs px-2 py-1 rounded-full font-bold ${
-                      promo.status === '可領取' ? 'bg-green-100 text-green-600' :
-                      promo.status === '已領取' ? 'bg-blue-100 text-blue-600' :
-                      'bg-gray-100 text-gray-600'
-                    }`}>
+                    <span className={`text-xs px-2 py-1 rounded-full font-bold ${promo.status === '可領取' ? 'bg-green-100 text-green-600' :
+                        promo.status === '已領取' ? 'bg-blue-100 text-blue-600' :
+                          'bg-gray-100 text-gray-600'
+                      }`}>
                       {promo.status}
                     </span>
                   </div>
@@ -1166,7 +1159,7 @@ const DoggyCasinoUI = () => {
                 <span className="text-sm font-bold">52,000 / 200,000</span>
               </div>
               <div className="bg-white bg-opacity-30 rounded-full h-3 overflow-hidden">
-                <div className="bg-white h-full rounded-full" style={{width: '26%'}}></div>
+                <div className="bg-white h-full rounded-full" style={{ width: '26%' }}></div>
               </div>
               <p className="text-xs mt-2 opacity-90">再儲值 NT$ 148,000 即可升級至鑽石會員</p>
             </div>
@@ -1196,11 +1189,10 @@ const DoggyCasinoUI = () => {
           {vipLevels.map(vip => (
             <div
               key={vip.level}
-              className={`rounded-2xl p-5 shadow-md transition-all ${
-                vip.current
+              className={`rounded-2xl p-5 shadow-md transition-all ${vip.current
                   ? 'bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-400'
                   : 'bg-white'
-              }`}
+                }`}
             >
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-3">
@@ -1255,7 +1247,7 @@ const DoggyCasinoUI = () => {
                 { icon: '⚡', title: '快速提領', desc: '專屬通道 10 分鐘到帳' },
                 { icon: '👔', title: '專屬客服', desc: '1對1 VIP 客服經理' },
                 { icon: '🎊', title: '專屬活動', desc: '每月限定高額回饋活動' },
-                { icon: '🏆', title: '升級禮金', desc: 'NT$ 3,000 升級獎勵'  }
+                { icon: '🏆', title: '升級禮金', desc: 'NT$ 3,000 升級獎勵' }
               ].map((benefit, idx) => (
                 <div key={idx} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl">
                   <div className="text-2xl">{benefit.icon}</div>
@@ -1288,11 +1280,10 @@ const DoggyCasinoUI = () => {
           <button
             key={item.page}
             onClick={() => setCurrentPage(item.page)}
-            className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-xl transition-all ${
-              currentPage === item.page
+            className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-xl transition-all ${currentPage === item.page
                 ? 'text-blue-500 bg-blue-50'
                 : 'text-gray-400 hover:text-gray-600'
-            }`}
+              }`}
           >
             {item.icon}
             <span className="text-xs font-bold">{item.label}</span>
@@ -1344,17 +1335,15 @@ const DoggyCasinoUI = () => {
           <div className="fixed top-4 right-4 z-50 flex space-x-2">
             <button
               onClick={() => setIsMobile(true)}
-              className={`px-3 py-2 rounded-lg font-bold text-sm ${
-                isMobile ? 'bg-blue-500 text-white' : 'bg-white text-gray-600'
-              }`}
+              className={`px-3 py-2 rounded-lg font-bold text-sm ${isMobile ? 'bg-blue-500 text-white' : 'bg-white text-gray-600'
+                }`}
             >
               📱 手機版
             </button>
             <button
               onClick={() => setIsMobile(false)}
-              className={`px-3 py-2 rounded-lg font-bold text-sm ${
-                !isMobile ? 'bg-blue-500 text-white' : 'bg-white text-gray-600'
-              }`}
+              className={`px-3 py-2 rounded-lg font-bold text-sm ${!isMobile ? 'bg-blue-500 text-white' : 'bg-white text-gray-600'
+                }`}
             >
               💻 網頁版
             </button>
@@ -1411,17 +1400,16 @@ const DoggyCasinoUI = () => {
                     <h1 className="text-xl font-bold text-center text-gray-800 mb-2">汪汪娛樂城</h1>
                     <p className="text-xs text-center text-gray-500">天天開心玩、狗狗陪你贏</p>
                   </div>
-                  
+
                   <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
                     {Object.entries(pages).map(([key, label]) => (
                       <button
                         key={key}
                         onClick={() => setCurrentPage(key)}
-                        className={`w-full text-left px-6 py-4 font-bold transition-colors ${
-                          currentPage === key
+                        className={`w-full text-left px-6 py-4 font-bold transition-colors ${currentPage === key
                             ? 'bg-blue-500 text-white'
                             : 'text-gray-700 hover:bg-gray-50'
-                        }`}
+                          }`}
                       >
                         {label}
                       </button>
