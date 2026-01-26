@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Menu, MessageCircle } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 
 // Components
 import BottomNav from './components/BottomNav';
@@ -24,11 +24,18 @@ import MemberPromotionsPage from './pages/Member/MemberPromotionsPage';
 import MemberVipPage from './pages/Member/MemberVipPage';
 
 const App = () => {
-    const [currentPage, setCurrentPage] = useState('home');
+    // 從 localStorage 讀取登入狀態,如果沒有則預設為 false
+    const [currentPage, setCurrentPage] = useState(() => {
+        const saved = localStorage.getItem('currentPage');
+        return saved || 'home';
+    });
     const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
     const [memberSubPage, setMemberSubPage] = useState('main');
     const [selectedActivity, setSelectedActivity] = useState<number | null>(null);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(() => {
+        const saved = localStorage.getItem('isLoggedIn');
+        return saved === 'true';
+    });
     const [showLogin, setShowLogin] = useState(false);
 
     // 自動偵測螢幕尺寸
@@ -49,6 +56,16 @@ const App = () => {
             mediaQuery.removeEventListener('change', handleChange);
         };
     }, []);
+
+    // 持久化登入狀態到 localStorage
+    useEffect(() => {
+        localStorage.setItem('isLoggedIn', String(isLoggedIn));
+    }, [isLoggedIn]);
+
+    // 持久化當前頁面到 localStorage
+    useEffect(() => {
+        localStorage.setItem('currentPage', currentPage);
+    }, [currentPage]);
 
     // 頁面切換
     const pages = {
@@ -274,6 +291,9 @@ const App = () => {
                                 setIsLoggedIn(false);
                                 setShowLogin(false);
                                 setCurrentPage('home');
+                                // 清除 localStorage 中的登入狀態
+                                localStorage.removeItem('isLoggedIn');
+                                localStorage.removeItem('currentPage');
                             }}
                             className="px-4 py-2 rounded-lg font-bold text-sm bg-red-500 text-white hover:bg-red-600 shadow-md"
                         >
@@ -286,7 +306,7 @@ const App = () => {
                         {isMobile ? (
                             <>
                                 {/* 手機版頂部 */}
-                                <div className="mb-4 bg-white rounded-2xl p-4 shadow-md flex items-center justify-between">
+                                <div className="mb-4 bg-white rounded-2xl p-4 shadow-md flex items-center">
                                     <div className="flex items-center space-x-2">
                                         <div className="text-3xl">🐶</div>
                                         <div>
@@ -294,9 +314,6 @@ const App = () => {
                                             <p className="text-xs text-gray-500">安全 · 快速 · 可靠</p>
                                         </div>
                                     </div>
-                                    <button className="text-gray-600">
-                                        <Menu size={24} />
-                                    </button>
                                 </div>
 
                                 {/* 頁面內容 */}
