@@ -12,9 +12,10 @@ interface GameCategory {
 interface HomePageProps {
     setCurrentPage: (page: string) => void;
     gameCategories: GameCategory[];
+    onGameSelect?: (game: GameCategory) => void;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ setCurrentPage, gameCategories }) => {
+const HomePage: React.FC<HomePageProps> = ({ setCurrentPage, gameCategories, onGameSelect }) => {
     return (
         <div className="space-y-4 pb-20">
             {/* Hero Banner */}
@@ -72,7 +73,11 @@ const HomePage: React.FC<HomePageProps> = ({ setCurrentPage, gameCategories }) =
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                     {gameCategories.slice(0, 4).map(game => (
-                        <div key={game.id} className={`${game.color} bg-opacity-20 rounded-2xl p-4 shadow-md hover:scale-105 transition-transform`}>
+                        <div
+                            key={game.id}
+                            onClick={() => onGameSelect?.(game)}
+                            className={`${game.color} bg-opacity-20 rounded-2xl p-4 shadow-md hover:scale-105 transition-transform cursor-pointer`}
+                        >
                             <div className="text-3xl mb-2">{game.dog}</div>
                             <div className="text-2xl mb-1">{game.icon}</div>
                             <h3 className="font-bold text-gray-800 text-sm">{game.name}</h3>

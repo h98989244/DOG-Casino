@@ -422,7 +422,7 @@ const App = () => {
                                 </div>
 
                                 {/* 頁面內容 */}
-                                {currentPage === 'home' && <HomePage setCurrentPage={setCurrentPage} gameCategories={gameCategories} />}
+                                {currentPage === 'home' && <HomePage setCurrentPage={setCurrentPage} gameCategories={gameCategories} onGameSelect={handleGameSelect} />}
                                 {currentPage === 'games' && <GamesPage gameCategories={gameCategories} onGameSelect={handleGameSelect} />}
                                 {currentPage === 'deposit' && <DepositPage />}
                                 {currentPage === 'activities' && <ActivitiesPage />}
@@ -486,7 +486,7 @@ const App = () => {
 
                                 {/* 主內容區 */}
                                 <div className="col-span-9">
-                                    {currentPage === 'home' && <HomePage setCurrentPage={setCurrentPage} gameCategories={gameCategories} />}
+                                    {currentPage === 'home' && <HomePage setCurrentPage={setCurrentPage} gameCategories={gameCategories} onGameSelect={handleGameSelect} />}
                                     {currentPage === 'games' && <GamesPage gameCategories={gameCategories} onGameSelect={handleGameSelect} />}
                                     {currentPage === 'deposit' && <DepositPage />}
                                     {currentPage === 'activities' && <ActivitiesPage />}
