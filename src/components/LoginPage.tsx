@@ -20,6 +20,19 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
+    const [showForgotPassword, setShowForgotPassword] = useState(false);
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetSuccess, setResetSuccess] = useState(false);
+
+    // 載入時檢查是否有儲存的帳號
+    React.useEffect(() => {
+        const savedEmail = localStorage.getItem('rememberedEmail');
+        if (savedEmail) {
+            setFormData(prev => ({ ...prev, email: savedEmail }));
+            setRememberMe(true);
+        }
+    }, []);
 
     const handleLogin = async () => {
         setError('');
@@ -37,6 +50,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
             }
 
             if (data.user) {
+                // 處理「記住我」功能
+                if (rememberMe) {
+                    localStorage.setItem('rememberedEmail', formData.email);
+                } else {
+                    localStorage.removeItem('rememberedEmail');
+                }
+
                 setIsLoggedIn(true);
                 setShowLogin(false);
                 setCurrentPage('home');
@@ -87,6 +107,36 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
             }
         } catch (err: any) {
             setError(err.message || '註冊失敗');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleForgotPassword = async () => {
+        setError('');
+        setResetSuccess(false);
+
+        if (!resetEmail) {
+            setError('請輸入您的 Email');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const { error: resetError } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+                redirectTo: `${window.location.origin}/reset-password`,
+            });
+
+            if (resetError) {
+                setError(resetError.message);
+                return;
+            }
+
+            setResetSuccess(true);
+            setError('');
+        } catch (err: any) {
+            setError(err.message || '發送重設郵件失敗');
         } finally {
             setLoading(false);
         }
@@ -192,11 +242,20 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                                 />
                             </div>
                             <div className="flex items-center justify-between text-sm">
-                                <label className="flex items-center space-x-2 text-gray-600">
-                                    <input type="checkbox" className="rounded" />
+                                <label className="flex items-center space-x-2 text-gray-600 cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="rounded cursor-pointer"
+                                        checked={rememberMe}
+                                        onChange={(e) => setRememberMe(e.target.checked)}
+                                    />
                                     <span>記住我</span>
                                 </label>
-                                <button className="text-blue-500 font-bold hover:underline">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowForgotPassword(true)}
+                                    className="text-blue-500 font-bold hover:underline"
+                                >
                                     忘記密碼?
                                 </button>
                             </div>
@@ -285,6 +344,69 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                         </div>
                     )}
                 </div>
+
+                {/* 忘記密碼對話框 */}
+                {showForgotPassword && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                        <div className="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-md space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-2xl font-bold text-gray-800">重設密碼</h2>
+                                <button
+                                    onClick={() => {
+                                        setShowForgotPassword(false);
+                                        setResetEmail('');
+                                        setResetSuccess(false);
+                                        setError('');
+                                    }}
+                                    className="text-gray-400 hover:text-gray-600 text-2xl"
+                                >
+                                    ×
+                                </button>
+                            </div>
+
+                            {resetSuccess ? (
+                                <div className="bg-green-50 border-2 border-green-200 text-green-700 px-4 py-6 rounded-2xl text-center space-y-2">
+                                    <div className="text-4xl mb-2">✉️</div>
+                                    <p className="font-bold">郵件已發送!</p>
+                                    <p className="text-sm">請檢查您的信箱,點擊郵件中的連結來重設密碼。</p>
+                                </div>
+                            ) : (
+                                <>
+                                    <p className="text-gray-600 text-sm">
+                                        請輸入您註冊時使用的 Email,我們將發送密碼重設連結給您。
+                                    </p>
+
+                                    {error && (
+                                        <div className="bg-red-50 border-2 border-red-200 text-red-600 px-4 py-3 rounded-2xl text-sm">
+                                            {error}
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2">
+                                            Email
+                                        </label>
+                                        <input
+                                            type="email"
+                                            placeholder="請輸入 Email"
+                                            value={resetEmail}
+                                            onChange={(e) => setResetEmail(e.target.value)}
+                                            className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all text-gray-900 bg-white"
+                                        />
+                                    </div>
+
+                                    <button
+                                        onClick={handleForgotPassword}
+                                        disabled={loading}
+                                        className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-4 rounded-2xl font-bold shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {loading ? '發送中...' : '發送重設郵件'}
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 {/* 客服提示 */}
                 <div className="mt-6 bg-white rounded-2xl p-4 shadow-md text-center">
