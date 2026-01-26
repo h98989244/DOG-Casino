@@ -37,7 +37,7 @@ export const useUserVipInfo = () => {
                     .from('vip_levels')
                     .select('*')
                     .eq('level', profile.vip_level)
-                    .single()
+                    .maybeSingle()
 
                 setCurrentLevelInfo(currentLevel)
 
