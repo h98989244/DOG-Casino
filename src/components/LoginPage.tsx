@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { LiffService } from '../lib/liff';
 
 interface LoginPageProps {
     isMobile: boolean;
@@ -143,12 +144,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
     };
 
     const handleLineLogin = () => {
-        window.open('https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=YOUR_LINE_CHANNEL_ID&redirect_uri=YOUR_CALLBACK_URL&state=12345abcde&scope=profile%20openid', '_blank');
-        setTimeout(() => {
-            setIsLoggedIn(true);
-            setShowLogin(false);
-            setCurrentPage('home');
-        }, 2000);
+        // 使用 LIFF 進行登入
+        LiffService.login();
     };
 
     return (

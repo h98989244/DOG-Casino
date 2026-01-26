@@ -5,6 +5,7 @@ import { MessageCircle } from 'lucide-react';
 import BottomNav from './components/BottomNav';
 import LineButton from './components/LineButton';
 import LoginPage from './components/LoginPage';
+import { LiffService, LiffUser } from './lib/liff';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -36,6 +37,7 @@ const App = () => {
         const saved = localStorage.getItem('isLoggedIn');
         return saved === 'true';
     });
+    const [liffUser, setLiffUser] = useState<LiffUser | null>(null);
     const [showLogin, setShowLogin] = useState(false);
 
     // 自動偵測螢幕尺寸
@@ -55,6 +57,19 @@ const App = () => {
         return () => {
             mediaQuery.removeEventListener('change', handleChange);
         };
+    }, []);
+
+    // 初始化 LIFF 並檢查登入狀態
+    useEffect(() => {
+        const initLiff = async () => {
+            const { isLoggedIn: liffIsLoggedIn } = await LiffService.init();
+            if (liffIsLoggedIn) {
+                setIsLoggedIn(true);
+                const profile = await LiffService.getProfile();
+                setLiffUser(profile);
+            }
+        };
+        initLiff();
     }, []);
 
     // 持久化登入狀態到 localStorage
@@ -288,7 +303,9 @@ const App = () => {
                     <div className="fixed top-4 right-4 z-50">
                         <button
                             onClick={() => {
+                                LiffService.logout(); // LIFF 登出
                                 setIsLoggedIn(false);
+                                setLiffUser(null);
                                 setShowLogin(false);
                                 setCurrentPage('home');
                                 // 清除 localStorage 中的登入狀態
@@ -306,11 +323,15 @@ const App = () => {
                         {isMobile ? (
                             <>
                                 {/* 手機版頂部 */}
-                                <div className="mb-4 bg-white rounded-2xl p-4 shadow-md flex items-center">
+                                <div className="mb-4 bg-white rounded-2xl p-4 shadow-md flex items-center justify-between">
                                     <div className="flex items-center space-x-2">
-                                        <div className="text-3xl">🐶</div>
+                                        {liffUser?.pictureUrl ? (
+                                            <img src={liffUser.pictureUrl} alt={liffUser.displayName} className="w-10 h-10 rounded-full" />
+                                        ) : (
+                                            <div className="text-3xl">🐶</div>
+                                        )}
                                         <div>
-                                            <h1 className="font-bold text-gray-800">汪汪娛樂城</h1>
+                                            <h1 className="font-bold text-gray-800">{liffUser ? liffUser.displayName : '汪汪娛樂城'}</h1>
                                             <p className="text-xs text-gray-500">安全 · 快速 · 可靠</p>
                                         </div>
                                     </div>
@@ -335,8 +356,14 @@ const App = () => {
                                 {/* 左側選單 */}
                                 <div className="col-span-3 space-y-4">
                                     <div className="bg-white rounded-3xl p-6 shadow-lg">
-                                        <div className="text-5xl mb-3 text-center">🐶</div>
-                                        <h1 className="text-xl font-bold text-center text-gray-800 mb-2">汪汪娛樂城</h1>
+                                        <div className="flex justify-center mb-3">
+                                            {liffUser?.pictureUrl ? (
+                                                <img src={liffUser.pictureUrl} alt={liffUser.displayName} className="w-20 h-20 rounded-full object-cover border-4 border-blue-100" />
+                                            ) : (
+                                                <div className="text-5xl">🐶</div>
+                                            )}
+                                        </div>
+                                        <h1 className="text-xl font-bold text-center text-gray-800 mb-2">{liffUser ? liffUser.displayName : '汪汪娛樂城'}</h1>
                                         <p className="text-xs text-center text-gray-500">天天開心玩、狗狗陪你贏</p>
                                     </div>
 
