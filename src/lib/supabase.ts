@@ -87,3 +87,25 @@ export interface UserPromotion {
     claimed_at: string
     completed_at: string | null
 }
+
+export interface VipLevel {
+    id: number
+    level: number
+    name: string
+    icon: string | null
+    min_deposit: number
+    cashback_rate: number
+    daily_withdrawal_limit: number | null
+    created_at: string
+    updated_at: string
+}
+
+export interface VipBenefit {
+    id: number
+    vip_level: number
+    icon: string | null
+    title: string
+    description: string | null
+    sort_order: number
+    created_at: string
+}
