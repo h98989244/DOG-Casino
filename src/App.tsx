@@ -125,7 +125,8 @@ const App = () => {
                                 console.log('✅ Edge Function 登入成功:', responseData);
                                 if (responseData.user) {
                                     console.log('使用者資料:', responseData.user);
-                                    // 可以在此處將 responseData.user 存入狀態或 Context
+                                    // 將使用者資料存入 localStorage
+                                    localStorage.setItem('userProfile', JSON.stringify(responseData.user));
                                 }
                             }
                         } catch (fetchError) {

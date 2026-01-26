@@ -95,7 +95,12 @@ Deno.serve(async (req) => {
         if (!user) {
             // 4. 建立新使用者
             console.log('建立新使用者:', userId)
+
+            // 生成 UUID
+            const newUserId = crypto.randomUUID()
+
             const newUserData = {
+                id: newUserId,  // 明確指定 UUID
                 username: userId,
                 full_name: displayName || '新使用者',
                 avatar_url: pictureUrl || null,
