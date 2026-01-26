@@ -1,18 +1,71 @@
 import React from 'react';
 import { Clock } from 'lucide-react';
 import MemberBackButton from '../../components/MemberBackButton';
+import { useUserTransactions } from '../../hooks/useUserTransactions';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import ErrorMessage from '../../components/ErrorMessage';
+import EmptyState from '../../components/EmptyState';
 
 interface MemberTransactionsPageProps {
     setMemberSubPage: (page: string) => void;
 }
 
 const MemberTransactionsPage: React.FC<MemberTransactionsPageProps> = ({ setMemberSubPage }) => {
-    const transactions = [
-        { id: 'T202401231545', type: '儲值', amount: 5000, status: '成功', time: '2024-01-23 15:45', method: '銀行轉帳' },
-        { id: 'T202401231234', type: '提領', amount: -3000, status: '處理中', time: '2024-01-23 12:34', method: '銀行轉帳' },
-        { id: 'T202401220956', type: '儲值', amount: 10000, status: '成功', time: '2024-01-22 09:56', method: '超商代碼' },
-        { id: 'T202401211823', type: '提領', amount: -2000, status: '成功', time: '2024-01-21 18:23', method: '銀行轉帳' }
-    ];
+    const { transactions, loading, error } = useUserTransactions({ limit: 50 });
+
+    if (loading) {
+        return <LoadingSpinner text="載入交易紀錄中..." />;
+    }
+
+    if (error) {
+        return <ErrorMessage message={error} />;
+    }
+
+    // 計算本月交易總額
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+
+    const monthlyTransactions = transactions.filter(tx => {
+        const txDate = new Date(tx.created_at);
+        return txDate.getMonth() === currentMonth && txDate.getFullYear() === currentYear;
+    });
+
+    const monthlyDeposit = monthlyTransactions
+        .filter(tx => tx.type === 'deposit' && tx.status === 'completed')
+        .reduce((sum, tx) => sum + tx.amount, 0);
+
+    const monthlyWithdrawal = monthlyTransactions
+        .filter(tx => tx.type === 'withdrawal' && tx.status === 'completed')
+        .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+
+    const monthlyTotal = monthlyDeposit + monthlyWithdrawal;
+
+    // 類型中文對照
+    const typeMap: Record<string, string> = {
+        'deposit': '儲值',
+        'withdrawal': '提領',
+        'bonus': '紅利',
+        'refund': '退款'
+    };
+
+    // 狀態中文對照
+    const statusMap: Record<string, string> = {
+        'pending': '處理中',
+        'completed': '成功',
+        'failed': '失敗',
+        'cancelled': '已取消'
+    };
+
+    // 格式化時間
+    const formatTime = (dateString: string) => {
+        return new Date(dateString).toLocaleString('zh-TW', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
 
     return (
         <div className="space-y-4 pb-20">
@@ -28,10 +81,10 @@ const MemberTransactionsPage: React.FC<MemberTransactionsPageProps> = ({ setMemb
                     <span className="text-sm opacity-90">本月交易總額</span>
                     <span className="text-2xl">💳</span>
                 </div>
-                <div className="text-3xl font-bold mb-2">NT$ 18,000</div>
+                <div className="text-3xl font-bold mb-2">NT$ {monthlyTotal.toLocaleString()}</div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div>儲值:NT$ 15,000</div>
-                    <div>提領:NT$ 3,000</div>
+                    <div>儲值:NT$ {monthlyDeposit.toLocaleString()}</div>
+                    <div>提領:NT$ {monthlyWithdrawal.toLocaleString()}</div>
                 </div>
             </div>
 
@@ -48,42 +101,56 @@ const MemberTransactionsPage: React.FC<MemberTransactionsPageProps> = ({ setMemb
             </div>
 
             {/* 交易列表 */}
-            {transactions.map(tx => (
-                <div key={tx.id} className="bg-white rounded-2xl p-4 shadow-md">
-                    <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center space-x-3">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === '儲值' ? 'bg-green-100' : 'bg-blue-100'
-                                }`}>
-                                {tx.type === '儲值' ? '💵' : '🏦'}
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-gray-800">{tx.type}</h3>
-                                <p className="text-xs text-gray-500">{tx.method}</p>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <div className={`text-lg font-bold ${tx.amount > 0 ? 'text-green-600' : 'text-blue-600'
-                                }`}>
-                                {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
-                            </div>
-                            <span className={`text-xs px-2 py-1 rounded-full ${tx.status === '成功' ? 'bg-green-100 text-green-600' :
-                                    tx.status === '處理中' ? 'bg-yellow-100 text-yellow-600' :
-                                        'bg-red-100 text-red-600'
-                                }`}>
-                                {tx.status}
-                            </span>
-                        </div>
-                    </div>
+            {transactions.length === 0 ? (
+                <EmptyState
+                    icon="💰"
+                    title="尚無交易紀錄"
+                    description="開始進行儲值或提領交易吧!"
+                />
+            ) : (
+                transactions.map(tx => {
+                    const typeText = typeMap[tx.type] || tx.type;
+                    const statusText = statusMap[tx.status] || tx.status;
+                    const isDeposit = tx.type === 'deposit' || tx.type === 'bonus';
 
-                    <div className="flex items-center justify-between text-xs text-gray-400 pt-2 border-t">
-                        <span>訂單號:{tx.id}</span>
-                        <span className="flex items-center">
-                            <Clock size={12} className="mr-1" />
-                            {tx.time}
-                        </span>
-                    </div>
-                </div>
-            ))}
+                    return (
+                        <div key={tx.id} className="bg-white rounded-2xl p-4 shadow-md">
+                            <div className="flex items-start justify-between mb-3">
+                                <div className="flex items-center space-x-3">
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isDeposit ? 'bg-green-100' : 'bg-blue-100'
+                                        }`}>
+                                        {isDeposit ? '💵' : '🏦'}
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-gray-800">{typeText}</h3>
+                                        <p className="text-xs text-gray-500">{tx.payment_method || '系統'}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className={`text-lg font-bold ${isDeposit ? 'text-green-600' : 'text-blue-600'
+                                        }`}>
+                                        {isDeposit ? '+' : '-'}{Math.abs(tx.amount).toLocaleString()}
+                                    </div>
+                                    <span className={`text-xs px-2 py-1 rounded-full ${tx.status === 'completed' ? 'bg-green-100 text-green-600' :
+                                            tx.status === 'pending' ? 'bg-yellow-100 text-yellow-600' :
+                                                'bg-red-100 text-red-600'
+                                        }`}>
+                                        {statusText}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between text-xs text-gray-400 pt-2 border-t">
+                                <span>訂單號:{tx.transaction_id || tx.id.substring(0, 16)}</span>
+                                <span className="flex items-center">
+                                    <Clock size={12} className="mr-1" />
+                                    {formatTime(tx.created_at)}
+                                </span>
+                            </div>
+                        </div>
+                    );
+                })
+            )}
         </div>
     );
 };
