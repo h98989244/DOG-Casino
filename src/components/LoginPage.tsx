@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { MessageCircle } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface LoginPageProps {
     isMobile: boolean;
@@ -11,24 +12,88 @@ interface LoginPageProps {
 const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowLogin, setCurrentPage }) => {
     const [isLogin, setIsLogin] = useState(true);
     const [formData, setFormData] = useState({
-        username: '',
+        email: '',
         password: '',
         confirmPassword: '',
         phone: '',
         inviteCode: ''
     });
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    const handleLogin = () => {
-        // 這裡處理登入邏輯
-        setIsLoggedIn(true);
-        setShowLogin(false);
-        setCurrentPage('home');
+    const handleLogin = async () => {
+        setError('');
+        setLoading(true);
+
+        try {
+            const { data, error: authError } = await supabase.auth.signInWithPassword({
+                email: formData.email,
+                password: formData.password,
+            });
+
+            if (authError) {
+                setError(authError.message);
+                return;
+            }
+
+            if (data.user) {
+                setIsLoggedIn(true);
+                setShowLogin(false);
+                setCurrentPage('home');
+            }
+        } catch (err: any) {
+            setError(err.message || '登入失敗');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRegister = async () => {
+        setError('');
+
+        if (formData.password !== formData.confirmPassword) {
+            setError('密碼不一致');
+            return;
+        }
+
+        if (formData.password.length < 6) {
+            setError('密碼至少需要 6 個字元');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const { data, error: authError } = await supabase.auth.signUp({
+                email: formData.email,
+                password: formData.password,
+                options: {
+                    data: {
+                        phone: formData.phone,
+                        invite_code: formData.inviteCode
+                    }
+                }
+            });
+
+            if (authError) {
+                setError(authError.message);
+                return;
+            }
+
+            if (data.user) {
+                setIsLoggedIn(true);
+                setShowLogin(false);
+                setCurrentPage('home');
+            }
+        } catch (err: any) {
+            setError(err.message || '註冊失敗');
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleLineLogin = () => {
-        // 這裡處理 LINE 登入
         window.open('https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=YOUR_LINE_CHANNEL_ID&redirect_uri=YOUR_CALLBACK_URL&state=12345abcde&scope=profile%20openid', '_blank');
-        // 模擬登入成功
         setTimeout(() => {
             setIsLoggedIn(true);
             setShowLogin(false);
@@ -51,7 +116,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                     {/* 切換標籤 */}
                     <div className="flex bg-gray-100 rounded-2xl p-1">
                         <button
-                            onClick={() => setIsLogin(true)}
+                            onClick={() => {
+                                setIsLogin(true);
+                                setError('');
+                            }}
                             className={`flex-1 py-3 rounded-xl font-bold transition-all ${isLogin
                                 ? 'bg-blue-500 text-white shadow-md'
                                 : 'text-gray-500'
@@ -60,7 +128,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                             會員登入
                         </button>
                         <button
-                            onClick={() => setIsLogin(false)}
+                            onClick={() => {
+                                setIsLogin(false);
+                                setError('');
+                            }}
                             className={`flex-1 py-3 rounded-xl font-bold transition-all ${!isLogin
                                 ? 'bg-blue-500 text-white shadow-md'
                                 : 'text-gray-500'
@@ -86,18 +157,25 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                         <div className="flex-1 border-t-2 border-gray-200"></div>
                     </div>
 
+                    {/* 錯誤訊息 */}
+                    {error && (
+                        <div className="bg-red-50 border-2 border-red-200 text-red-600 px-4 py-3 rounded-2xl text-sm">
+                            {error}
+                        </div>
+                    )}
+
                     {/* 登入表單 */}
                     {isLogin ? (
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-2">
-                                    帳號
+                                    Email
                                 </label>
                                 <input
-                                    type="text"
-                                    placeholder="請輸入帳號"
-                                    value={formData.username}
-                                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                                    type="email"
+                                    placeholder="請輸入 Email"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
                                 />
                             </div>
@@ -124,9 +202,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                             </div>
                             <button
                                 onClick={handleLogin}
-                                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-4 rounded-2xl font-bold shadow-lg hover:scale-105 transition-transform"
+                                disabled={loading}
+                                className="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-4 rounded-2xl font-bold shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                立即登入
+                                {loading ? '登入中...' : '立即登入'}
                             </button>
                         </div>
                     ) : (
@@ -134,13 +213,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-2">
-                                    帳號
+                                    Email
                                 </label>
                                 <input
-                                    type="text"
-                                    placeholder="6-12位英文或數字"
-                                    value={formData.username}
-                                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                                    type="email"
+                                    placeholder="請輸入 Email"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
                                 />
                             </div>
@@ -150,7 +229,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                                 </label>
                                 <input
                                     type="password"
-                                    placeholder="6-20位英文或數字"
+                                    placeholder="至少 6 個字元"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                     className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
@@ -197,10 +276,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                                 <span>我已閱讀並同意<span className="text-blue-500 font-bold">服務條款</span>及<span className="text-blue-500 font-bold">隱私政策</span></span>
                             </div>
                             <button
-                                onClick={handleLogin}
-                                className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-4 rounded-2xl font-bold shadow-lg hover:scale-105 transition-transform"
+                                onClick={handleRegister}
+                                disabled={loading}
+                                className="w-full bg-gradient-to-r from-pink-500 to-purple-500 text-white py-4 rounded-2xl font-bold shadow-lg hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                立即註冊
+                                {loading ? '註冊中...' : '立即註冊'}
                             </button>
                         </div>
                     )}
