@@ -64,6 +64,13 @@ const App = () => {
     useEffect(() => {
         const initLiff = async () => {
             try {
+                // 檢查 URL 是否有推薦碼
+                const urlParams = new URLSearchParams(window.location.search);
+                const refCode = urlParams.get('ref');
+                if (refCode) {
+                    localStorage.setItem('referredBy', refCode);
+                }
+
                 const { isLoggedIn: liffIsLoggedIn } = await LiffService.init();
                 if (liffIsLoggedIn) {
                     setIsLoggedIn(true);
@@ -75,25 +82,32 @@ const App = () => {
                     // 2. 獲取 LINE ID Token
                     const idToken = window.liff?.getIDToken();
 
-                    if (idToken) {
-                        // 3. 使用 Supabase 進行 LINE 登入 (交換 Token)
-                        const { data, error } = await supabase.auth.signInWithIdToken({
-                            provider: 'line',
-                            token: idToken,
-                        })
+                    if (idToken && profile) {
+                        // 3. 呼叫 Supabase Edge Function 進行驗證與建立使用者
+                        console.log('Verifying with Supabase Edge Function...');
+
+                        const { data, error } = await supabase.functions.invoke('line-login', {
+                            body: {
+                                idToken: idToken,
+                                userId: profile.userId,
+                                displayName: profile.displayName,
+                                pictureUrl: profile.pictureUrl,
+                                referred_by: localStorage.getItem('referredBy') || null
+                            }
+                        });
 
                         if (error) {
-                            console.error('Supabase LINE login error:', error)
+                            console.error('Supabase Edge Function login error:', error);
                         } else {
-                            // Supabase 登入成功，useAuth 會自動更新
-                            console.log('Supabase LINE login success', data)
+                            console.log('Supabase Edge Function login success:', data);
+                            // 可以在此處將 data.user 存入狀態或 Context
                         }
                     } else {
-                        console.error('No ID token found')
+                        console.error('No ID token or profile found');
                     }
                 }
             } catch (error) {
-                console.error('LIFF init error:', error)
+                console.error('LIFF init error:', error);
             }
         };
         initLiff();
