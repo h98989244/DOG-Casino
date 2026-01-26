@@ -33,53 +33,71 @@ Deno.serve(async (req) => {
             throw new Error('Invalid JSON body')
         }
 
-        const { idToken, amount, paymentMethod } = requestBody
+        const { idToken, accessToken, amount, paymentMethod } = requestBody
 
-        if (!idToken || !amount) {
-            throw new Error('Missing required fields: idToken or amount')
+        if ((!idToken && !accessToken) || !amount) {
+            throw new Error('Missing required fields: (idToken or accessToken) and amount')
         }
 
-        // 1. Verify LINE ID Token
-        const body = new URLSearchParams()
-        body.append('id_token', idToken)
-        // verify endpoint requires client_id
-        body.append('client_id', lineChannelId!)
-
-        console.log('Verifying token with LINE...')
-        const verifyResp = await fetch('https://api.line.me/oauth2/v2.1/verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: body
-        })
-
-        if (!verifyResp.ok) {
-            const errText = await verifyResp.text()
-            throw new Error(`Invalid LINE ID Token: ${verifyResp.status} - ${errText}`)
-        }
-
-        const verifyData = await verifyResp.json()
-        const lineUserId = verifyData.sub
-
-        // 2. Init Supabase Admin
+        // Init Supabase Admin
         const supabaseAdmin = createClient(supabaseUrl!, serviceRoleKey!)
+        let userId: string
 
-        // 3. Get User Profile
-        const { data: user, error: findError } = await supabaseAdmin
-            .from('user_profiles')
-            .select('id, full_name')
-            .eq('username', lineUserId)
-            .single()
+        // 根據提供的 token 類型進行驗證
+        if (idToken) {
+            // LINE 登入:驗證 LINE ID Token
+            const body = new URLSearchParams()
+            body.append('id_token', idToken)
+            body.append('client_id', lineChannelId!)
 
-        if (findError || !user) {
-            console.error('User not found for LINE ID:', lineUserId)
-            throw new Error('User not found. Please login again.')
+            console.log('Verifying LINE ID Token...')
+            const verifyResp = await fetch('https://api.line.me/oauth2/v2.1/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: body
+            })
+
+            if (!verifyResp.ok) {
+                const errText = await verifyResp.text()
+                throw new Error(`Invalid LINE ID Token: ${verifyResp.status} - ${errText}`)
+            }
+
+            const verifyData = await verifyResp.json()
+            const lineUserId = verifyData.sub
+
+            // 從 user_profiles 查詢使用者
+            const { data: user, error: findError } = await supabaseAdmin
+                .from('user_profiles')
+                .select('id, full_name')
+                .eq('username', lineUserId)
+                .single()
+
+            if (findError || !user) {
+                console.error('User not found for LINE ID:', lineUserId)
+                throw new Error('User not found. Please login again.')
+            }
+
+            userId = user.id
+        } else if (accessToken) {
+            // EMAIL 登入:驗證 Supabase Access Token
+            console.log('Verifying Supabase Access Token...')
+            const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(accessToken)
+
+            if (authError || !user) {
+                console.error('Invalid Supabase Access Token:', authError)
+                throw new Error('Invalid session. Please login again.')
+            }
+
+            userId = user.id
+        } else {
+            throw new Error('No valid authentication token provided')
         }
 
-        // 4. Create Transaction
+        // 建立交易記錄
         const { error: insertError } = await supabaseAdmin
             .from('transactions')
             .insert({
-                user_id: user.id,
+                user_id: userId,
                 type: 'deposit',
                 amount: Number(amount),
                 status: 'pending',

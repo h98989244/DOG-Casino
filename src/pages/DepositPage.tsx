@@ -29,21 +29,28 @@ const DepositPage: React.FC = () => {
             setSubmitting(true);
             setMessage(null);
 
-            // 獲取 LINE ID Token
+            // 檢測登入方式並取得對應的驗證 token
             const idToken = window.liff?.getIDToken();
-            if (!idToken) {
-                // 如果沒有 idToken，嘗試重新登入或報錯
-                // 在 LIFF 環境下通常會有，除非過期
-                throw new Error('無法取得驗證資訊，請重新登入');
+            let requestBody: any = {
+                amount: Number(selectedAmount),
+                paymentMethod: 'quick_pay'
+            };
+
+            if (idToken) {
+                // LINE 登入:使用 LINE ID Token
+                requestBody.idToken = idToken;
+            } else {
+                // EMAIL 登入:使用 Supabase Access Token
+                const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+                if (sessionError || !sessionData.session?.access_token) {
+                    throw new Error('無法取得驗證資訊,請重新登入');
+                }
+                requestBody.accessToken = sessionData.session.access_token;
             }
 
-            // 改用 Edge Function 建立交易，繞過 RLS 問題並進行伺服器端驗證
+            // 改用 Edge Function 建立交易,繞過 RLS 問題並進行伺服器端驗證
             const { data, error } = await supabase.functions.invoke('create-deposit', {
-                body: {
-                    idToken: idToken,
-                    amount: Number(selectedAmount),
-                    paymentMethod: 'quick_pay'
-                }
+                body: requestBody
             });
 
             if (error) {
