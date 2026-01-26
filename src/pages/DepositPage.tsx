@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { CreditCard } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { useAuth } from '../hooks/useAuth';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { useUserVipInfo } from '../hooks/useUserVipInfo';
 
 const DepositPage: React.FC = () => {
-    const { user } = useAuth();
+    // 移除 useAuth，改用 useUserProfile 判斷登入狀態
+    // const { user } = useAuth();
     const { profile, loading: profileLoading } = useUserProfile();
     const { currentLevelInfo, loading: vipLoading } = useUserVipInfo();
     const [selectedAmount, setSelectedAmount] = useState<string>('');
@@ -14,7 +14,8 @@ const DepositPage: React.FC = () => {
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
     const handleDeposit = async () => {
-        if (!user) {
+        // 使用 profile 判斷是否登入
+        if (!profile) {
             setMessage({ type: 'error', text: '請先登入' });
             return;
         }
@@ -28,6 +29,34 @@ const DepositPage: React.FC = () => {
             setSubmitting(true);
             setMessage(null);
 
+            // 獲取 LINE ID Token
+            const idToken = window.liff?.getIDToken();
+            if (!idToken) {
+                // 如果沒有 idToken，嘗試重新登入或報錯
+                // 在 LIFF 環境下通常會有，除非過期
+                throw new Error('無法取得驗證資訊，請重新登入');
+            }
+
+            // 改用 Edge Function 建立交易，繞過 RLS 問題並進行伺服器端驗證
+            const { data, error } = await supabase.functions.invoke('create-deposit', {
+                body: {
+                    idToken: idToken,
+                    amount: Number(selectedAmount),
+                    paymentMethod: 'quick_pay'
+                }
+            });
+
+            if (error) {
+                console.error('Edge Function Error:', error);
+                throw new Error(error.message || '連線失敗');
+            }
+
+            if (!data.success) {
+                throw new Error(data.error || '儲值申請失敗');
+            }
+
+            // 直接寫入 DB 的舊代碼 (已註解)
+            /*
             const { error } = await supabase.from('transactions').insert({
                 user_id: user.id,
                 type: 'deposit',
@@ -36,8 +65,7 @@ const DepositPage: React.FC = () => {
                 payment_method: 'quick_pay',
                 description: `快速儲值 ${selectedAmount}`
             });
-
-            if (error) throw error;
+            */
 
             setMessage({ type: 'success', text: '儲值申請已提交，請稍候' });
             setSelectedAmount('');
@@ -115,3 +143,4 @@ const DepositPage: React.FC = () => {
 };
 
 export default DepositPage;
+
