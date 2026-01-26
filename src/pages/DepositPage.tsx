@@ -1,5 +1,5 @@
 import React from 'react';
-import { CreditCard, DollarSign } from 'lucide-react';
+import { CreditCard } from 'lucide-react';
 
 const DepositPage: React.FC = () => {
     return (
