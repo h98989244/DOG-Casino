@@ -176,7 +176,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                                     placeholder="請輸入 Email"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
+                                    className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all text-gray-900 bg-white"
                                 />
                             </div>
                             <div>
@@ -188,7 +188,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                                     placeholder="請輸入密碼"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
+                                    className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all text-gray-900 bg-white"
                                 />
                             </div>
                             <div className="flex items-center justify-between text-sm">
@@ -220,7 +220,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                                     placeholder="請輸入 Email"
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
+                                    className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all text-gray-900 bg-white"
                                 />
                             </div>
                             <div>
@@ -232,7 +232,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                                     placeholder="至少 6 個字元"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
+                                    className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all text-gray-900 bg-white"
                                 />
                             </div>
                             <div>
@@ -244,7 +244,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                                     placeholder="請再次輸入密碼"
                                     value={formData.confirmPassword}
                                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                    className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
+                                    className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all text-gray-900 bg-white"
                                 />
                             </div>
                             <div>
@@ -256,7 +256,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                                     placeholder="請輸入手機號碼"
                                     value={formData.phone}
                                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                    className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
+                                    className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all text-gray-900 bg-white"
                                 />
                             </div>
                             <div>
@@ -268,7 +268,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                                     placeholder="請輸入邀請碼"
                                     value={formData.inviteCode}
                                     onChange={(e) => setFormData({ ...formData, inviteCode: e.target.value })}
-                                    className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all"
+                                    className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 focus:border-blue-400 outline-none transition-all text-gray-900 bg-white"
                                 />
                             </div>
                             <div className="flex items-start space-x-2 text-sm text-gray-600">
