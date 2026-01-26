@@ -13,7 +13,7 @@ const FishingGamePage: React.FC<FishingGamePageProps> = ({ onExit }) => {
 
     const [balance, setBalance] = useState(10000); // Default balance
     const [currentBet, setCurrentBet] = useState(10);
-    const [vipLevel, setVipLevel] = useState(0);
+
     const [isAutoFire, setIsAutoFire] = useState(false);
     const [isLocked, setIsLocked] = useState(false);
     const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -41,9 +41,7 @@ const FishingGamePage: React.FC<FishingGamePageProps> = ({ onExit }) => {
         setBalance(coins);
     };
 
-    const handleVipLevelChange = (level: number) => {
-        setVipLevel(level);
-    };
+
 
     const handleToggleAutoFire = () => {
         if (engineRef.current) {
@@ -74,23 +72,7 @@ const FishingGamePage: React.FC<FishingGamePageProps> = ({ onExit }) => {
         }
     };
 
-    const handleRecharge = (amount: number) => {
-        // In a real app, this would be an API call
-        if (engineRef.current) {
-            engineRef.current.balance += amount;
-            setBalance(engineRef.current.balance);
-            showToast(`充值成功！+${amount}`);
-        }
-    };
 
-    const handleClaimDaily = () => {
-        if (engineRef.current) {
-            const amount = 1000;
-            engineRef.current.balance += amount;
-            setBalance(engineRef.current.balance);
-            showToast(`領取成功！+${amount}`);
-        }
-    };
 
     return (
         <div className="relative w-full h-screen overflow-hidden bg-black">
@@ -99,19 +81,15 @@ const FishingGamePage: React.FC<FishingGamePageProps> = ({ onExit }) => {
                 onEngineDestroy={handleEngineDestroy}
                 onCoinsChange={handleCoinsChange}
                 onToast={showToast}
-                onVipLevelChange={handleVipLevelChange}
             />
             <GameUI
                 balance={balance}
                 currentBet={currentBet}
-                vipLevel={vipLevel}
                 isAutoFire={isAutoFire}
                 isLocked={isLocked}
                 onToggleAutoFire={handleToggleAutoFire}
                 onToggleLock={handleToggleLock}
                 onChangeBet={handleChangeBet}
-                onRecharge={handleRecharge}
-                onClaimDaily={handleClaimDaily}
                 onExit={onExit}
                 toastMessage={toastMessage}
             />

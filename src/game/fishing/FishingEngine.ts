@@ -6,7 +6,6 @@ export interface FishingEngineOptions {
     canvas: HTMLCanvasElement;
     onCoinsChange?: (coins: number) => void;
     onToast?: (msg: string) => void;
-    onVipLevelChange?: (level: number) => void;
 }
 
 interface Bubble {
@@ -45,7 +44,6 @@ export class FishingEngine {
     lockedFish: Fish | null = null;
     turretAngle: number = -Math.PI / 2;
     lastFireTime: number = 0;
-    vipLevel: number = 0;
 
     // Background
     bgImage: HTMLImageElement;
@@ -54,7 +52,6 @@ export class FishingEngine {
     // Callbacks
     onCoinsChange?: (coins: number) => void;
     onToast?: (msg: string) => void;
-    onVipLevelChange?: (level: number) => void;
 
     animationFrameId: number | null = null;
     running: boolean = false;
@@ -67,7 +64,6 @@ export class FishingEngine {
 
         this.onCoinsChange = options.onCoinsChange;
         this.onToast = options.onToast;
-        this.onVipLevelChange = options.onVipLevelChange;
 
         this.bgImage = new Image();
         this.bgImage.src = '/assets/fishing/bg.png';

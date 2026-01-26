@@ -5,6 +5,7 @@
 - **Region**: ap-southeast-1
 - **App ID**: `d2jf0g0ejbn3x1`
 - **URL**: [https://main.d2jf0g0ejbn3x1.amplifyapp.com](https://main.d2jf0g0ejbn3x1.amplifyapp.com)
+- **Status**: Building (Job Running)
 
 ## Recent Changes
 ### Fishing Game Implementation
@@ -13,13 +14,12 @@
 - **Responsive Design**: Auto-scaling Canvas to support both desktop and mobile viewports.
 - **Integration**: Added to the main App routing (`/fishing`) and accessible via the Game Lobby.
 
-## Deployment Steps (Automated)
-1. **Build**: `pnpm build` creates the production bundle in `dist/`.
-2. **Package**: The `dist/` directory is compressed into `deploy.zip`.
-3. **Deploy**:
-   - `aws amplify create-deployment` initiates a new deployment job.
-   - The zip artifact is uploaded to the S3 bucket provided by the deployment job.
-   - `aws amplify start-deployment` triggers the deployment process.
+## Deployment Steps (Executed)
+1. **Commit**: Changes committed to git with message "feat: Implement Fishing Game".
+2. **Push**: Pushed to `origin/main` branch.
+3. **Trigger**: AWS Amplify automatically detected the push and started a new build job.
+   - **Commit ID**: `d0a8e58`
+   - **Job Status**: `RUNNING` (Verified via AWS CLI)
 
 ## Resources Used
 - **Compute**: AWS Amplify Hosting (Standard build compute).

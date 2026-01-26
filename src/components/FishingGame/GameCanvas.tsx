@@ -6,15 +6,13 @@ interface GameCanvasProps {
     onEngineDestroy: () => void;
     onCoinsChange: (coins: number) => void;
     onToast: (msg: string) => void;
-    onVipLevelChange: (level: number) => void;
 }
 
 export const GameCanvas: React.FC<GameCanvasProps> = ({
     onEngineInit,
     onEngineDestroy,
     onCoinsChange,
-    onToast,
-    onVipLevelChange
+    onToast
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -24,8 +22,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         const engine = new FishingEngine({
             canvas: canvasRef.current,
             onCoinsChange,
-            onToast,
-            onVipLevelChange
+            onToast
         });
 
         onEngineInit(engine);
