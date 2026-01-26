@@ -1,52 +1,122 @@
-import React, { useEffect } from 'react'
+import React, { useState, useRef, useCallback } from 'react';
+import { GameCanvas } from '../components/FishingGame/GameCanvas';
+import { GameUI } from '../components/FishingGame/GameUI';
+import { FishingEngine } from '../game/fishing/FishingEngine';
+import { CONFIG } from '../game/fishing/Constants';
 
 interface FishingGamePageProps {
-    onBack: () => void
+    onExit: () => void;
 }
 
-const FishingGamePage: React.FC<FishingGamePageProps> = ({ onBack }) => {
-    useEffect(() => {
-        // 載入遊戲時自動全螢幕
-        const requestFullscreen = () => {
-            const elem = document.documentElement
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(err => {
-                    console.log('無法進入全螢幕:', err)
-                })
-            }
-        }
+const FishingGamePage: React.FC<FishingGamePageProps> = ({ onExit }) => {
+    const engineRef = useRef<FishingEngine | null>(null);
 
-        // 延遲一下再請求全螢幕,避免被瀏覽器阻擋
-        const timer = setTimeout(requestFullscreen, 500)
+    const [balance, setBalance] = useState(10000); // Default balance
+    const [currentBet, setCurrentBet] = useState(10);
+    const [vipLevel, setVipLevel] = useState(0);
+    const [isAutoFire, setIsAutoFire] = useState(false);
+    const [isLocked, setIsLocked] = useState(false);
+    const [toastMessage, setToastMessage] = useState<string | null>(null);
+    const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-        return () => {
-            clearTimeout(timer)
-            // 離開遊戲時退出全螢幕
-            if (document.fullscreenElement) {
-                document.exitFullscreen()
-            }
+    const showToast = useCallback((msg: string) => {
+        setToastMessage(msg);
+        if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+        toastTimeoutRef.current = setTimeout(() => setToastMessage(null), 2500);
+    }, []);
+
+    const handleEngineInit = (engine: FishingEngine) => {
+        engineRef.current = engine;
+        // Sync initial state if needed
+        setBalance(engine.balance);
+        setCurrentBet(engine.currentBet);
+        showToast('歡迎來到捕魚遊戲！');
+    };
+
+    const handleEngineDestroy = () => {
+        engineRef.current = null;
+    };
+
+    const handleCoinsChange = (coins: number) => {
+        setBalance(coins);
+    };
+
+    const handleVipLevelChange = (level: number) => {
+        setVipLevel(level);
+    };
+
+    const handleToggleAutoFire = () => {
+        if (engineRef.current) {
+            setIsAutoFire(engineRef.current.toggleAutoFire());
         }
-    }, [])
+    };
+
+    const handleToggleLock = () => {
+        if (engineRef.current) {
+            setIsLocked(engineRef.current.toggleLock());
+        }
+    };
+
+    const handleChangeBet = (delta: number) => {
+        if (!engineRef.current) return;
+        const steps = CONFIG.betSteps;
+        const currentIndex = steps.indexOf(currentBet);
+        let newIndex = currentIndex + delta;
+
+        // Clamp index
+        if (newIndex < 0) newIndex = 0;
+        if (newIndex >= steps.length) newIndex = steps.length - 1;
+
+        const newBet = steps[newIndex];
+        if (newBet !== currentBet) {
+            setCurrentBet(newBet);
+            engineRef.current.setBet(newBet);
+        }
+    };
+
+    const handleRecharge = (amount: number) => {
+        // In a real app, this would be an API call
+        if (engineRef.current) {
+            engineRef.current.balance += amount;
+            setBalance(engineRef.current.balance);
+            showToast(`充值成功！+${amount}`);
+        }
+    };
+
+    const handleClaimDaily = () => {
+        if (engineRef.current) {
+            const amount = 1000;
+            engineRef.current.balance += amount;
+            setBalance(engineRef.current.balance);
+            showToast(`領取成功！+${amount}`);
+        }
+    };
 
     return (
-        <div className="fixed inset-0 z-50 bg-black">
-            {/* 返回按鈕 */}
-            <button
-                onClick={onBack}
-                className="absolute top-4 left-4 z-[60] bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-bold shadow-lg transition-all"
-            >
-                ← 返回遊戲大廳
-            </button>
-
-            {/* 遊戲 iframe */}
-            <iframe
-                src="/fishing-game/index.html"
-                className="w-full h-full border-0"
-                title="捕魚遊戲"
-                allow="fullscreen"
+        <div className="relative w-full h-screen overflow-hidden bg-black">
+            <GameCanvas
+                onEngineInit={handleEngineInit}
+                onEngineDestroy={handleEngineDestroy}
+                onCoinsChange={handleCoinsChange}
+                onToast={showToast}
+                onVipLevelChange={handleVipLevelChange}
+            />
+            <GameUI
+                balance={balance}
+                currentBet={currentBet}
+                vipLevel={vipLevel}
+                isAutoFire={isAutoFire}
+                isLocked={isLocked}
+                onToggleAutoFire={handleToggleAutoFire}
+                onToggleLock={handleToggleLock}
+                onChangeBet={handleChangeBet}
+                onRecharge={handleRecharge}
+                onClaimDaily={handleClaimDaily}
+                onExit={onExit}
+                toastMessage={toastMessage}
             />
         </div>
-    )
-}
+    );
+};
 
-export default FishingGamePage
+export default FishingGamePage;

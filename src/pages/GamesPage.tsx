@@ -10,10 +10,10 @@ interface GameCategory {
 
 interface GamesPageProps {
     gameCategories: GameCategory[];
-    onGameClick?: (gameId: number) => void;
+    onGameSelect?: (game: GameCategory) => void;
 }
 
-const GamesPage: React.FC<GamesPageProps> = ({ gameCategories, onGameClick }) => {
+const GamesPage: React.FC<GamesPageProps> = ({ gameCategories, onGameSelect }) => {
     return (
         <div className="space-y-4 pb-20">
             <h1 className="text-2xl font-bold text-gray-800 flex items-center">
@@ -24,7 +24,7 @@ const GamesPage: React.FC<GamesPageProps> = ({ gameCategories, onGameClick }) =>
                 {gameCategories.map(game => (
                     <div
                         key={game.id}
-                        onClick={() => onGameClick?.(game.id)}
+                        onClick={() => onGameSelect?.(game)}
                         className={`${game.color} bg-opacity-20 rounded-3xl p-6 shadow-lg hover:scale-105 transition-transform cursor-pointer`}
                     >
                         <div className="text-5xl mb-3 text-center">{game.dog}</div>
