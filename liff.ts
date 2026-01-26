@@ -15,7 +15,7 @@ export async function initLiff(): Promise<boolean> {
         }
 
         await window.liff.init({ liffId: LIFF_ID })
-        console.log('LIFF initialized successfully')
+        // console.log('LIFF initialized successfully')
         return true
     } catch (error) {
         console.error('LIFF initialization failed:', error)

@@ -6,7 +6,7 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-console.log('來自 Line Login Function 的問候！')
+// console.log('來自 Line Login Function 的問候！')
 
 Deno.serve(async (req) => {
     // 處理 CORS
@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
 
         const { idToken, userId, displayName, pictureUrl, referred_by } = requestBody
 
-        console.log('收到登入請求:', { userId, displayName, hasIdToken: !!idToken })
+        // console.log('收到登入請求:', { userId, displayName, hasIdToken: !!idToken })
 
         if (!idToken || !userId) {
             console.error('缺少必要欄位:', { hasIdToken: !!idToken, hasUserId: !!userId })
@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
         }
 
         // 1. 驗證 LINE idToken
-        console.log('開始驗證 LINE ID Token...')
+        // console.log('開始驗證 LINE ID Token...')
         const body = new URLSearchParams()
         body.append('id_token', idToken)
         body.append('client_id', lineChannelId)
@@ -71,14 +71,14 @@ Deno.serve(async (req) => {
         }
 
         const verifyData = await verifyResp.json()
-        console.log('LINE ID Token 驗證成功:', { sub: verifyData.sub })
+        // console.log('LINE ID Token 驗證成功:', { sub: verifyData.sub })
 
         // 2. 初始化 Supabase Admin Client
-        console.log('初始化 Supabase Client...')
+        // console.log('初始化 Supabase Client...')
         const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey)
 
         // 3. 檢查現有使用者
-        console.log('檢查使用者是否存在:', userId)
+        // console.log('檢查使用者是否存在:', userId)
         const { data: existingUser, error: findError } = await supabaseAdmin
             .from('user_profiles')
             .select('*')
@@ -94,7 +94,7 @@ Deno.serve(async (req) => {
 
         if (!user) {
             // 4. 建立新使用者
-            console.log('建立新使用者:', userId)
+            // console.log('建立新使用者:', userId)
 
             // 生成 UUID
             const newUserId = crypto.randomUUID()
@@ -110,7 +110,7 @@ Deno.serve(async (req) => {
                 referral_code: Math.random().toString(36).substring(2, 8).toUpperCase()
             }
 
-            console.log('新使用者資料:', newUserData)
+            // console.log('新使用者資料:', newUserData)
 
             const { data: newUser, error: createError } = await supabaseAdmin
                 .from('user_profiles')
@@ -119,21 +119,21 @@ Deno.serve(async (req) => {
                 .single()
 
             if (createError) {
-                console.error('建立使用者失敗:', createError)
+                // console.error('建立使用者失敗:', createError)
                 throw new Error(`建立使用者失敗: ${createError.message}`)
             }
 
-            console.log('使用者建立成功:', newUser.id)
+            // console.log('使用者建立成功:', newUser.id)
             user = newUser
         } else {
             // 更新使用者資訊
-            console.log('使用者已存在,檢查是否需要更新')
+            // console.log('使用者已存在,檢查是否需要更新')
             const updates: any = {}
             if (displayName && user.full_name !== displayName) updates.full_name = displayName
             if (pictureUrl && user.avatar_url !== pictureUrl) updates.avatar_url = pictureUrl
 
             if (Object.keys(updates).length > 0) {
-                console.log('更新使用者資訊:', updates)
+                // console.log('更新使用者資訊:', updates)
                 const { data: updatedUser, error: updateError } = await supabaseAdmin
                     .from('user_profiles')
                     .update(updates)
@@ -142,17 +142,17 @@ Deno.serve(async (req) => {
                     .single()
 
                 if (updateError) {
-                    console.error('更新使用者失敗:', updateError)
+                    // console.error('更新使用者失敗:', updateError)
                 } else {
-                    console.log('使用者更新成功')
+                    // console.log('使用者更新成功')
                     user = updatedUser
                 }
             } else {
-                console.log('使用者資訊無需更新')
+                // console.log('使用者資訊無需更新')
             }
         }
 
-        console.log('登入流程完成,回傳使用者資料')
+        // console.log('登入流程完成,回傳使用者資料')
         return new Response(
             JSON.stringify({
                 success: true,

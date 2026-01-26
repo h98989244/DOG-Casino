@@ -24,6 +24,9 @@ import MemberTransactionsPage from './pages/Member/MemberTransactionsPage';
 import MemberPromotionsPage from './pages/Member/MemberPromotionsPage';
 import MemberVipPage from './pages/Member/MemberVipPage';
 
+// Game Pages
+import FishingGamePage from './pages/FishingGamePage';
+
 const App = () => {
     // 從 localStorage 讀取登入狀態,如果沒有則預設為 false
     const [currentPage, setCurrentPage] = useState(() => {
@@ -39,6 +42,7 @@ const App = () => {
     });
     const [liffUser, setLiffUser] = useState<LiffUser | null>(null);
     const [showLogin, setShowLogin] = useState(false);
+    const [activeGame, setActiveGame] = useState<number | null>(null);
 
     // 自動偵測螢幕尺寸
     useEffect(() => {
@@ -83,13 +87,13 @@ const App = () => {
 
                     if (idToken && profile) {
                         // 3. 呼叫 Supabase Edge Function 進行驗證與建立使用者
-                        console.log('Verifying with Supabase Edge Function...');
-                        console.log('Request data:', {
-                            userId: profile.userId,
-                            displayName: profile.displayName,
-                            hasPictureUrl: !!profile.pictureUrl,
-                            hasIdToken: !!idToken
-                        });
+                        // console.log('Verifying with Supabase Edge Function...');
+                        // console.log('Request data:', {
+                        //     userId: profile.userId,
+                        //     displayName: profile.displayName,
+                        //     hasPictureUrl: !!profile.pictureUrl,
+                        //     hasIdToken: !!idToken
+                        // });
 
                         try {
                             const response = await fetch(
@@ -112,8 +116,8 @@ const App = () => {
 
                             const responseData = await response.json();
 
-                            console.log('Response status:', response.status);
-                            console.log('Response data:', responseData);
+                            // console.log('Response status:', response.status);
+                            // console.log('Response data:', responseData);
 
                             if (!response.ok) {
                                 console.error('❌ Edge Function 錯誤:');
@@ -122,19 +126,19 @@ const App = () => {
                                 console.error('詳細資訊:', responseData.details);
                                 alert(`登入失敗:\n${responseData.error}\n\n詳細資訊:\n${responseData.details}`);
                             } else {
-                                console.log('✅ Edge Function 登入成功:', responseData);
+                                // console.log('✅ Edge Function 登入成功:', responseData);
                                 if (responseData.user) {
-                                    console.log('使用者資料:', responseData.user);
+                                    // console.log('使用者資料:', responseData.user);
                                     // 將使用者資料存入 localStorage
                                     localStorage.setItem('userProfile', JSON.stringify(responseData.user));
                                 }
                             }
                         } catch (fetchError) {
-                            console.error('❌ Fetch 錯誤:', fetchError);
+                            // console.error('❌ Fetch 錯誤:', fetchError);
                             alert(`網路錯誤: ${fetchError}`);
                         }
                     } else {
-                        console.error('No ID token or profile found');
+                        // console.error('No ID token or profile found');
                     }
                 }
             } catch (error) {
@@ -153,6 +157,21 @@ const App = () => {
     useEffect(() => {
         localStorage.setItem('currentPage', currentPage);
     }, [currentPage]);
+
+    // 遊戲點擊處理
+    const handleGameClick = (gameId: number) => {
+        if (gameId === 4) { // 捕魚遊戲的 ID
+            setActiveGame(gameId);
+        } else {
+            // 其他遊戲暫時顯示提示
+            alert('此遊戲即將推出,敬請期待!');
+        }
+    };
+
+    // 返回遊戲大廳
+    const handleBackToGames = () => {
+        setActiveGame(null);
+    };
 
     // 頁面切換
     const pages = {
@@ -371,118 +390,125 @@ const App = () => {
             ) : (
                 // 已登入的主要內容
                 <>
-                    {/* 登出按鈕 */}
-                    <div className="fixed top-4 right-4 z-50">
-                        <button
-                            onClick={() => {
-                                LiffService.logout(); // LIFF 登出
-                                setIsLoggedIn(false);
-                                setLiffUser(null);
-                                setShowLogin(false);
-                                setCurrentPage('home');
-                                // 清除 localStorage 中的登入狀態
-                                localStorage.removeItem('isLoggedIn');
-                                localStorage.removeItem('currentPage');
-                            }}
-                            className="px-4 py-2 rounded-lg font-bold text-sm bg-red-500 text-white hover:bg-red-600 shadow-md"
-                        >
-                            登出
-                        </button>
-                    </div>
-
-                    {/* 主容器 */}
-                    <div className={`${isMobile ? 'max-w-md mx-auto' : 'max-w-6xl mx-auto pt-20'} p-4`}>
-                        {isMobile ? (
-                            <>
-                                {/* 手機版頂部 */}
-                                <div className="mb-4 bg-white rounded-2xl p-4 shadow-md flex items-center justify-between">
-                                    <div className="flex items-center space-x-2">
-                                        {liffUser?.pictureUrl ? (
-                                            <img src={liffUser.pictureUrl} alt={liffUser.displayName} className="w-10 h-10 rounded-full" />
-                                        ) : (
-                                            <div className="text-3xl">🐶</div>
-                                        )}
-                                        <div>
-                                            <h1 className="font-bold text-gray-800">{liffUser ? liffUser.displayName : '汪汪娛樂城'}</h1>
-                                            <p className="text-xs text-gray-500">安全 · 快速 · 可靠</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* 頁面內容 */}
-                                {currentPage === 'home' && <HomePage setCurrentPage={setCurrentPage} gameCategories={gameCategories} />}
-                                {currentPage === 'games' && <GamesPage gameCategories={gameCategories} />}
-                                {currentPage === 'deposit' && <DepositPage />}
-                                {currentPage === 'activities' && <ActivitiesPage />}
-                                {currentPage === 'member' && <MemberPage />}
-
-                                {/* 底部導航 */}
-                                <BottomNav currentPage={currentPage} setCurrentPage={setCurrentPage} />
-
-                                {/* LINE 客服 */}
-                                <LineButton />
-                            </>
-                        ) : (
-                            // 網頁版佈局
-                            <div className="grid grid-cols-12 gap-6">
-                                {/* 左側選單 */}
-                                <div className="col-span-3 space-y-4">
-                                    <div className="bg-white rounded-3xl p-6 shadow-lg">
-                                        <div className="flex justify-center mb-3">
-                                            {liffUser?.pictureUrl ? (
-                                                <img src={liffUser.pictureUrl} alt={liffUser.displayName} className="w-20 h-20 rounded-full object-cover border-4 border-blue-100" />
-                                            ) : (
-                                                <div className="text-5xl">🐶</div>
-                                            )}
-                                        </div>
-                                        <h1 className="text-xl font-bold text-center text-gray-800 mb-2">{liffUser ? liffUser.displayName : '汪汪娛樂城'}</h1>
-                                        <p className="text-xs text-center text-gray-500">天天開心玩、狗狗陪你贏</p>
-                                    </div>
-
-                                    <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
-                                        {Object.entries(pages).map(([key, label]) => (
-                                            <button
-                                                key={key}
-                                                onClick={() => setCurrentPage(key)}
-                                                className={`w-full text-left px-6 py-4 font-bold transition-colors ${currentPage === key
-                                                    ? 'bg-blue-500 text-white'
-                                                    : 'text-gray-700 hover:bg-gray-50'
-                                                    }`}
-                                            >
-                                                {label}
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    {/* LINE 客服 */}
-                                    <div className="bg-green-500 rounded-3xl p-4 text-white shadow-lg">
-                                        <div className="flex items-center space-x-3 mb-3">
-                                            <MessageCircle size={24} />
-                                            <span className="font-bold">LINE 客服</span>
-                                        </div>
-                                        <p className="text-sm mb-3 opacity-90">即時線上為您服務</p>
-                                        <a
-                                            href="https://line.me/ti/p/@your-line-id"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="block w-full bg-white text-green-600 py-2 rounded-xl font-bold hover:scale-105 transition-transform text-center"
-                                        >
-                                            立即聯繫
-                                        </a>
-                                    </div>
-                                </div>
-
-                                {/* 主內容區 */}
-                                <div className="col-span-9">
-                                    {currentPage === 'home' && <HomePage setCurrentPage={setCurrentPage} gameCategories={gameCategories} />}
-                                    {currentPage === 'games' && <GamesPage gameCategories={gameCategories} />}
-                                    {currentPage === 'deposit' && <DepositPage />}
-                                    {currentPage === 'activities' && <ActivitiesPage />}
-                                    {currentPage === 'member' && <MemberPage />}
-                                </div>
+                    {/* 如果正在遊玩遊戲,顯示遊戲頁面 */}
+                    {activeGame === 4 ? (
+                        <FishingGamePage onBack={handleBackToGames} />
+                    ) : (
+                        <>
+                            {/* 登出按鈕 */}
+                            <div className="fixed top-4 right-4 z-50">
+                                <button
+                                    onClick={() => {
+                                        LiffService.logout(); // LIFF 登出
+                                        setIsLoggedIn(false);
+                                        setLiffUser(null);
+                                        setShowLogin(false);
+                                        setCurrentPage('home');
+                                        // 清除 localStorage 中的登入狀態
+                                        localStorage.removeItem('isLoggedIn');
+                                        localStorage.removeItem('currentPage');
+                                    }}
+                                    className="px-4 py-2 rounded-lg font-bold text-sm bg-red-500 text-white hover:bg-red-600 shadow-md"
+                                >
+                                    登出
+                                </button>
                             </div>
-                        )}
-                    </div>
+
+                            {/* 主容器 */}
+                            <div className={`${isMobile ? 'max-w-md mx-auto' : 'max-w-6xl mx-auto pt-20'} p-4`}>
+                                {isMobile ? (
+                                    <>
+                                        {/* 手機版頂部 */}
+                                        <div className="mb-4 bg-white rounded-2xl p-4 shadow-md flex items-center justify-between">
+                                            <div className="flex items-center space-x-2">
+                                                {liffUser?.pictureUrl ? (
+                                                    <img src={liffUser.pictureUrl} alt={liffUser.displayName} className="w-10 h-10 rounded-full" />
+                                                ) : (
+                                                    <div className="text-3xl">🐶</div>
+                                                )}
+                                                <div>
+                                                    <h1 className="font-bold text-gray-800">{liffUser ? liffUser.displayName : '汪汪娛樂城'}</h1>
+                                                    <p className="text-xs text-gray-500">安全 · 快速 · 可靠</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* 頁面內容 */}
+                                        {currentPage === 'home' && <HomePage setCurrentPage={setCurrentPage} gameCategories={gameCategories} />}
+                                        {currentPage === 'games' && <GamesPage gameCategories={gameCategories} onGameClick={handleGameClick} />}
+                                        {currentPage === 'deposit' && <DepositPage />}
+                                        {currentPage === 'activities' && <ActivitiesPage />}
+                                        {currentPage === 'member' && <MemberPage />}
+
+                                        {/* 底部導航 */}
+                                        <BottomNav currentPage={currentPage} setCurrentPage={setCurrentPage} />
+
+                                        {/* LINE 客服 */}
+                                        <LineButton />
+                                    </>
+                                ) : (
+                                    // 網頁版佈局
+                                    <div className="grid grid-cols-12 gap-6">
+                                        {/* 左側選單 */}
+                                        <div className="col-span-3 space-y-4">
+                                            <div className="bg-white rounded-3xl p-6 shadow-lg">
+                                                <div className="flex justify-center mb-3">
+                                                    {liffUser?.pictureUrl ? (
+                                                        <img src={liffUser.pictureUrl} alt={liffUser.displayName} className="w-20 h-20 rounded-full object-cover border-4 border-blue-100" />
+                                                    ) : (
+                                                        <div className="text-5xl">🐶</div>
+                                                    )}
+                                                </div>
+                                                <h1 className="text-xl font-bold text-center text-gray-800 mb-2">{liffUser ? liffUser.displayName : '汪汪娛樂城'}</h1>
+                                                <p className="text-xs text-center text-gray-500">天天開心玩、狗狗陪你贏</p>
+                                            </div>
+
+                                            <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
+                                                {Object.entries(pages).map(([key, label]) => (
+                                                    <button
+                                                        key={key}
+                                                        onClick={() => setCurrentPage(key)}
+                                                        className={`w-full text-left px-6 py-4 font-bold transition-colors ${currentPage === key
+                                                            ? 'bg-blue-500 text-white'
+                                                            : 'text-gray-700 hover:bg-gray-50'
+                                                            }`}
+                                                    >
+                                                        {label}
+                                                    </button>
+                                                ))}
+                                            </div>
+
+                                            {/* LINE 客服 */}
+                                            <div className="bg-green-500 rounded-3xl p-4 text-white shadow-lg">
+                                                <div className="flex items-center space-x-3 mb-3">
+                                                    <MessageCircle size={24} />
+                                                    <span className="font-bold">LINE 客服</span>
+                                                </div>
+                                                <p className="text-sm mb-3 opacity-90">即時線上為您服務</p>
+                                                <a
+                                                    href="https://line.me/ti/p/@your-line-id"
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="block w-full bg-white text-green-600 py-2 rounded-xl font-bold hover:scale-105 transition-transform text-center"
+                                                >
+                                                    立即聯繫
+                                                </a>
+                                            </div>
+                                        </div>
+
+                                        {/* 主內容區 */}
+                                        <div className="col-span-9">
+                                            {currentPage === 'home' && <HomePage setCurrentPage={setCurrentPage} gameCategories={gameCategories} />}
+                                            {currentPage === 'games' && <GamesPage gameCategories={gameCategories} onGameClick={handleGameClick} />}
+                                            {currentPage === 'deposit' && <DepositPage />}
+                                            {currentPage === 'activities' && <ActivitiesPage />}
+                                            {currentPage === 'member' && <MemberPage />}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </>
             )}
 
