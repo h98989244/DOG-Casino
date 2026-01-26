@@ -27,13 +27,37 @@ export const useUserProfile = () => {
                     .single()
 
                 if (error) {
-                    setError(error.message)
-                    setProfile(null)
+                    // 如果找不到資料(PGRST116)，則自動建立
+                    if (error.code === 'PGRST116') {
+                        const newProfile = {
+                            id: user.id,
+                            username: user.email?.split('@')[0] || `user_${user.id.slice(0, 8)}`,
+                            full_name: '',
+                            created_at: new Date().toISOString()
+                        }
+
+                        const { data: insertData, error: insertError } = await supabase
+                            .from('user_profiles')
+                            .insert([newProfile])
+                            .select()
+                            .single()
+
+                        if (insertError) {
+                            throw insertError
+                        }
+
+                        setProfile(insertData)
+                        setError(null)
+                    } else {
+                        setError(error.message)
+                        setProfile(null)
+                    }
                 } else {
                     setProfile(data)
                     setError(null)
                 }
             } catch (err: any) {
+                console.error('Profile fetch error:', err)
                 setError(err.message || '獲取會員資料失敗')
                 setProfile(null)
             } finally {
