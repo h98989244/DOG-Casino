@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Menu, MessageCircle } from 'lucide-react';
 
 // Components
@@ -25,11 +25,30 @@ import MemberVipPage from './pages/Member/MemberVipPage';
 
 const App = () => {
     const [currentPage, setCurrentPage] = useState('home');
-    const [isMobile, setIsMobile] = useState(true);
+    const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
     const [memberSubPage, setMemberSubPage] = useState('main');
     const [selectedActivity, setSelectedActivity] = useState<number | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [showLogin, setShowLogin] = useState(false);
+
+    // 自動偵測螢幕尺寸
+    useEffect(() => {
+        const mediaQuery = window.matchMedia('(max-width: 767px)');
+
+        const handleChange = (e: MediaQueryListEvent | MediaQueryList) => {
+            setIsMobile(e.matches);
+        };
+
+        // 初始化
+        handleChange(mediaQuery);
+
+        // 監聽變化
+        mediaQuery.addEventListener('change', handleChange);
+
+        return () => {
+            mediaQuery.removeEventListener('change', handleChange);
+        };
+    }, []);
 
     // 頁面切換
     const pages = {
@@ -248,29 +267,15 @@ const App = () => {
             ) : (
                 // 已登入的主要內容
                 <>
-                    {/* 視圖切換器 */}
-                    <div className="fixed top-4 right-4 z-50 flex space-x-2">
-                        <button
-                            onClick={() => setIsMobile(true)}
-                            className={`px-3 py-2 rounded-lg font-bold text-sm ${isMobile ? 'bg-blue-500 text-white' : 'bg-white text-gray-600'
-                                }`}
-                        >
-                            📱 手機版
-                        </button>
-                        <button
-                            onClick={() => setIsMobile(false)}
-                            className={`px-3 py-2 rounded-lg font-bold text-sm ${!isMobile ? 'bg-blue-500 text-white' : 'bg-white text-gray-600'
-                                }`}
-                        >
-                            💻 網頁版
-                        </button>
+                    {/* 登出按鈕 */}
+                    <div className="fixed top-4 right-4 z-50">
                         <button
                             onClick={() => {
                                 setIsLoggedIn(false);
                                 setShowLogin(false);
                                 setCurrentPage('home');
                             }}
-                            className="px-3 py-2 rounded-lg font-bold text-sm bg-red-500 text-white hover:bg-red-600"
+                            className="px-4 py-2 rounded-lg font-bold text-sm bg-red-500 text-white hover:bg-red-600 shadow-md"
                         >
                             登出
                         </button>
