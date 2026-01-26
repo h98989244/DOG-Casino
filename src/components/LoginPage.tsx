@@ -51,6 +51,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
             }
 
             if (data.user) {
+                // 獲取使用者資料並存入 localStorage
+                const { data: userProfile, error: profileError } = await supabase
+                    .from('user_profiles')
+                    .select('*')
+                    .eq('id', data.user.id)
+                    .single();
+
+                if (profileError) {
+                    throw new Error('無法獲取會員資料');
+                }
+
+                if (userProfile) {
+                    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                }
+
                 // 處理「記住我」功能
                 if (rememberMe) {
                     localStorage.setItem('rememberedEmail', formData.email);
@@ -102,6 +117,20 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
             }
 
             if (data.user) {
+                // 等待一下讓觸發器建立 Profile
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // 獲取使用者資料並存入 localStorage
+                const { data: userProfile, error: profileError } = await supabase
+                    .from('user_profiles')
+                    .select('*')
+                    .eq('id', data.user.id)
+                    .single();
+
+                if (!profileError && userProfile) {
+                    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                }
+
                 setIsLoggedIn(true);
                 setShowLogin(false);
                 setCurrentPage('home');
