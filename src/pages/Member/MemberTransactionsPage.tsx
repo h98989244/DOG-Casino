@@ -34,11 +34,7 @@ const MemberTransactionsPage: React.FC<MemberTransactionsPageProps> = ({ setMemb
         .filter(tx => tx.type === 'deposit' && tx.status === 'completed')
         .reduce((sum, tx) => sum + tx.amount, 0);
 
-    const monthlyWithdrawal = monthlyTransactions
-        .filter(tx => tx.type === 'withdrawal' && tx.status === 'completed')
-        .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
-
-    const monthlyTotal = monthlyDeposit + monthlyWithdrawal;
+    const monthlyTotal = monthlyDeposit;
 
     // 類型中文對照
     const typeMap: Record<string, string> = {
@@ -84,13 +80,13 @@ const MemberTransactionsPage: React.FC<MemberTransactionsPageProps> = ({ setMemb
                 <div className="text-3xl font-bold mb-2">NT$ {monthlyTotal.toLocaleString()}</div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>儲值:NT$ {monthlyDeposit.toLocaleString()}</div>
-                    <div>提領:NT$ {monthlyWithdrawal.toLocaleString()}</div>
+
                 </div>
             </div>
 
             {/* 類型篩選 */}
             <div className="flex space-x-2">
-                {['全部', '儲值', '提領'].map(type => (
+                {['全部', '儲值'].map(type => (
                     <button
                         key={type}
                         className="px-4 py-2 bg-white rounded-full font-bold text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-500 shadow-sm"
@@ -105,7 +101,7 @@ const MemberTransactionsPage: React.FC<MemberTransactionsPageProps> = ({ setMemb
                 <EmptyState
                     icon="💰"
                     title="尚無交易紀錄"
-                    description="開始進行儲值或提領交易吧!"
+                /*description="開始進行儲值或提領交易吧!"*/
                 />
             ) : (
                 transactions.map(tx => {
@@ -132,8 +128,8 @@ const MemberTransactionsPage: React.FC<MemberTransactionsPageProps> = ({ setMemb
                                         {isDeposit ? '+' : '-'}{Math.abs(tx.amount).toLocaleString()}
                                     </div>
                                     <span className={`text-xs px-2 py-1 rounded-full ${tx.status === 'completed' ? 'bg-green-100 text-green-600' :
-                                            tx.status === 'pending' ? 'bg-yellow-100 text-yellow-600' :
-                                                'bg-red-100 text-red-600'
+                                        tx.status === 'pending' ? 'bg-yellow-100 text-yellow-600' :
+                                            'bg-red-100 text-red-600'
                                         }`}>
                                         {statusText}
                                     </span>

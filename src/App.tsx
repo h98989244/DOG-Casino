@@ -71,7 +71,7 @@ const App = () => {
     const pages = {
         home: '首頁',
         games: '遊戲大廳',
-        deposit: '儲值/提領',
+        deposit: '儲值',
         activities: '活動中心',
         member: '會員中心'
     };

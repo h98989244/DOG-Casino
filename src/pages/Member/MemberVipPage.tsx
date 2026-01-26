@@ -98,14 +98,7 @@ const MemberVipPage: React.FC<MemberVipPageProps> = ({ setMemberSubPage }) => {
                         <div className="font-bold text-lg">{(currentLevelInfo.cashback_rate * 100).toFixed(1)}%</div>
                         <div className="text-xs opacity-90">返水比例</div>
                     </div>
-                    <div className="text-center">
-                        <div className="font-bold text-lg">
-                            {currentLevelInfo.daily_withdrawal_limit === -1
-                                ? '無限'
-                                : `${currentLevelInfo.daily_withdrawal_limit}次`}
-                        </div>
-                        <div className="text-xs opacity-90">每日提領</div>
-                    </div>
+
                     <div className="text-center">
                         <div className="font-bold text-lg">專屬</div>
                         <div className="text-xs opacity-90">客服經理</div>
@@ -157,12 +150,7 @@ const MemberVipPage: React.FC<MemberVipPageProps> = ({ setMemberSubPage }) => {
                                 <div className="text-gray-500 mb-1">返水</div>
                                 <div className="font-bold text-green-600">{(vip.cashback_rate * 100).toFixed(1)}%</div>
                             </div>
-                            {/* <div className="text-center">
-                                <div className="text-gray-500 mb-1">提領</div>
-                                <div className="font-bold text-blue-600">
-                                    {vip.daily_withdrawal_limit === -1 ? '無限制' : `${vip.daily_withdrawal_limit}次/日`}
-                                </div>
-                            </div> */}
+
                             <div className="text-center">
                                 <div className="text-gray-500 mb-1">生日禮金</div>
                                 <div className="font-bold text-pink-600">{vip.level * 500}</div>

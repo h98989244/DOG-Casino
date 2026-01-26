@@ -6,7 +6,7 @@ const DepositPage: React.FC = () => {
         <div className="space-y-4 pb-20">
             <h1 className="text-2xl font-bold text-gray-800 flex items-center">
                 <span className="mr-2">💰</span>
-                儲值/提領
+                儲值
             </h1>
 
             {/* 餘額卡片 */}
