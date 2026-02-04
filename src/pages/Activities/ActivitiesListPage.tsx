@@ -1,26 +1,12 @@
 import React from 'react';
 import { MessageCircle } from 'lucide-react';
 import ActivityCard from '../../components/ActivityCard';
+import { useNavigate } from 'react-router-dom';
+import { activities } from '../../data/activities';
 
-interface Activity {
-    id: number;
-    title: string;
-    bonus: string;
-    bonusAmount: string;
-    time: string;
-    desc: string;
-    rules: string[];
-    steps: string[];
-    icon: string;
-    color: string;
-}
+const ActivitiesListPage: React.FC = () => {
+    const navigate = useNavigate();
 
-interface ActivitiesListPageProps {
-    activities: Activity[];
-    setSelectedActivity: (id: number | null) => void;
-}
-
-const ActivitiesListPage: React.FC<ActivitiesListPageProps> = ({ activities, setSelectedActivity }) => {
     return (
         <div className="space-y-4 pb-20">
             <h1 className="text-2xl font-bold text-gray-800 flex items-center">
@@ -34,7 +20,7 @@ const ActivitiesListPage: React.FC<ActivitiesListPageProps> = ({ activities, set
                 <h2 className="text-xl font-bold mb-2">週年慶大放送</h2>
                 <p className="text-sm mb-4 opacity-90">儲值滿千送千,最高贈送無上限</p>
                 <button
-                    onClick={() => setSelectedActivity(4)}
+                    onClick={() => navigate('/activities/4')}
                     className="bg-white text-purple-600 px-6 py-2 rounded-full font-bold hover:scale-105 transition-transform"
                 >
                     立即參加
@@ -58,7 +44,7 @@ const ActivitiesListPage: React.FC<ActivitiesListPageProps> = ({ activities, set
                 <ActivityCard
                     key={activity.id}
                     activity={activity}
-                    onClick={setSelectedActivity}
+                    onClick={(id) => navigate(`/activities/${id}`)}
                 />
             ))}
 

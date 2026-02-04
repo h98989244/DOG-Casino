@@ -1,30 +1,31 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronRight, Clock } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { activities } from '../../data/activities';
 
-interface Activity {
-    id: number;
-    title: string;
-    bonus: string;
-    bonusAmount: string;
-    time: string;
-    desc: string;
-    rules: string[];
-    steps: string[];
-    icon: string;
-    color: string;
-}
+const ActivityDetailPage: React.FC = () => {
+    const { id } = useParams<{ id: string }>();
+    const navigate = useNavigate();
+    const [activity, setActivity] = useState<typeof activities[0] | null>(null);
 
-interface ActivityDetailPageProps {
-    activity: Activity;
-    setSelectedActivity: (id: number | null) => void;
-}
+    useEffect(() => {
+        if (id) {
+            const found = activities.find(a => a.id === parseInt(id));
+            if (found) {
+                setActivity(found);
+            } else {
+                navigate('/activities');
+            }
+        }
+    }, [id, navigate]);
 
-const ActivityDetailPage: React.FC<ActivityDetailPageProps> = ({ activity, setSelectedActivity }) => {
+    if (!activity) return <div>Loading...</div>;
+
     return (
         <div className="space-y-4 pb-20">
             {/* 返回按鈕 */}
             <button
-                onClick={() => setSelectedActivity(null)}
+                onClick={() => navigate('/activities')}
                 className="flex items-center text-blue-500 font-bold hover:scale-105 transition-transform"
             >
                 <ChevronRight size={20} className="rotate-180" />

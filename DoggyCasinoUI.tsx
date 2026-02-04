@@ -210,8 +210,8 @@ const DoggyCasinoUI = () => {
               <button
                 onClick={() => setIsLogin(true)}
                 className={`flex-1 py-3 rounded-xl font-bold transition-all ${isLogin
-                    ? 'bg-blue-500 text-white shadow-md'
-                    : 'text-gray-500'
+                  ? 'bg-blue-500 text-white shadow-md'
+                  : 'text-gray-500'
                   }`}
               >
                 會員登入
@@ -219,8 +219,8 @@ const DoggyCasinoUI = () => {
               <button
                 onClick={() => setIsLogin(false)}
                 className={`flex-1 py-3 rounded-xl font-bold transition-all ${!isLogin
-                    ? 'bg-blue-500 text-white shadow-md'
-                    : 'text-gray-500'
+                  ? 'bg-blue-500 text-white shadow-md'
+                  : 'text-gray-500'
                   }`}
               >
                 立即註冊
@@ -383,7 +383,7 @@ const DoggyCasinoUI = () => {
           <div className="mt-6 bg-white rounded-2xl p-4 shadow-md text-center">
             <p className="text-sm text-gray-600 mb-2">遇到問題？</p>
             <a
-              href="https://line.me/ti/p/@your-line-id"
+              href="https://line.me/ti/p/@525jjefs"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center space-x-2 text-green-500 font-bold hover:underline"
@@ -733,7 +733,7 @@ const DoggyCasinoUI = () => {
             </div>
           </div>
           <a
-            href="https://line.me/ti/p/@your-line-id"
+            href="https://line.me/ti/p/@525jjefs"
             target="_blank"
             rel="noopener noreferrer"
             className="block w-full bg-white text-green-600 py-2 rounded-xl font-bold hover:scale-105 transition-transform flex items-center justify-center"
@@ -1027,8 +1027,8 @@ const DoggyCasinoUI = () => {
                     {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()}
                   </div>
                   <span className={`text-xs px-2 py-1 rounded-full ${tx.status === '成功' ? 'bg-green-100 text-green-600' :
-                      tx.status === '處理中' ? 'bg-yellow-100 text-yellow-600' :
-                        'bg-red-100 text-red-600'
+                    tx.status === '處理中' ? 'bg-yellow-100 text-yellow-600' :
+                      'bg-red-100 text-red-600'
                     }`}>
                     {tx.status}
                   </span>
@@ -1098,8 +1098,8 @@ const DoggyCasinoUI = () => {
                       +NT$ {promo.bonus.toLocaleString()}
                     </span>
                     <span className={`text-xs px-2 py-1 rounded-full font-bold ${promo.status === '可領取' ? 'bg-green-100 text-green-600' :
-                        promo.status === '已領取' ? 'bg-blue-100 text-blue-600' :
-                          'bg-gray-100 text-gray-600'
+                      promo.status === '已領取' ? 'bg-blue-100 text-blue-600' :
+                        'bg-gray-100 text-gray-600'
                       }`}>
                       {promo.status}
                     </span>
@@ -1190,8 +1190,8 @@ const DoggyCasinoUI = () => {
             <div
               key={vip.level}
               className={`rounded-2xl p-5 shadow-md transition-all ${vip.current
-                  ? 'bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-400'
-                  : 'bg-white'
+                ? 'bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-400'
+                : 'bg-white'
                 }`}
             >
               <div className="flex items-center justify-between mb-3">
@@ -1281,8 +1281,8 @@ const DoggyCasinoUI = () => {
             key={item.page}
             onClick={() => setCurrentPage(item.page)}
             className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-xl transition-all ${currentPage === item.page
-                ? 'text-blue-500 bg-blue-50'
-                : 'text-gray-400 hover:text-gray-600'
+              ? 'text-blue-500 bg-blue-50'
+              : 'text-gray-400 hover:text-gray-600'
               }`}
           >
             {item.icon}
@@ -1296,7 +1296,7 @@ const DoggyCasinoUI = () => {
   // LINE 客服按鈕
   const LineButton = () => (
     <a
-      href="https://line.me/ti/p/@your-line-id"
+      href="https://line.me/ti/p/@525jjefs"
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-24 right-4 bg-green-500 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform z-50 flex items-center justify-center"
@@ -1407,8 +1407,8 @@ const DoggyCasinoUI = () => {
                         key={key}
                         onClick={() => setCurrentPage(key)}
                         className={`w-full text-left px-6 py-4 font-bold transition-colors ${currentPage === key
-                            ? 'bg-blue-500 text-white'
-                            : 'text-gray-700 hover:bg-gray-50'
+                          ? 'bg-blue-500 text-white'
+                          : 'text-gray-700 hover:bg-gray-50'
                           }`}
                       >
                         {label}
@@ -1424,7 +1424,7 @@ const DoggyCasinoUI = () => {
                     </div>
                     <p className="text-sm mb-3 opacity-90">即時線上為您服務</p>
                     <a
-                      href="https://line.me/ti/p/@your-line-id"
+                      href="https://line.me/ti/p/@525jjefs"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="block w-full bg-white text-green-600 py-2 rounded-xl font-bold hover:scale-105 transition-transform text-center"

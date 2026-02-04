@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { MessageCircle } from 'lucide-react';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 
 // Components
 import BottomNav from './components/BottomNav';
@@ -28,19 +29,17 @@ import FishingGamePage from './pages/FishingGamePage';
 
 const App = () => {
     // 從 localStorage 讀取登入狀態,如果沒有則預設為 false
-    const [currentPage, setCurrentPage] = useState(() => {
-        const saved = localStorage.getItem('currentPage');
-        return saved || 'home';
-    });
     const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
-    const [memberSubPage, setMemberSubPage] = useState('main');
-    const [selectedActivity, setSelectedActivity] = useState<number | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(() => {
         const saved = localStorage.getItem('isLoggedIn');
         return saved === 'true';
     });
     const [liffUser, setLiffUser] = useState<LiffUser | null>(null);
     const [showLogin, setShowLogin] = useState(false);
+
+    // We can use hooks here because App is wrapped in BrowserRouter in main.tsx
+    const navigate = useNavigate();
+    const location = useLocation();
 
     // 自動偵測螢幕尺寸
     useEffect(() => {
@@ -84,15 +83,6 @@ const App = () => {
                     const idToken = window.liff?.getIDToken();
 
                     if (idToken && profile) {
-                        // 3. 呼叫 Supabase Edge Function 進行驗證與建立使用者
-                        // console.log('Verifying with Supabase Edge Function...');
-                        // console.log('Request data:', {
-                        //     userId: profile.userId,
-                        //     displayName: profile.displayName,
-                        //     hasPictureUrl: !!profile.pictureUrl,
-                        //     hasIdToken: !!idToken
-                        // });
-
                         try {
                             const response = await fetch(
                                 'https://fsnlwfmlcxdznyduagrj.supabase.co/functions/v1/line-login',
@@ -114,29 +104,17 @@ const App = () => {
 
                             const responseData = await response.json();
 
-                            // console.log('Response status:', response.status);
-                            // console.log('Response data:', responseData);
-
                             if (!response.ok) {
-                                console.error('❌ Edge Function 錯誤:');
-                                console.error('狀態碼:', response.status);
-                                console.error('錯誤訊息:', responseData.error);
-                                console.error('詳細資訊:', responseData.details);
+                                console.error('❌ Edge Function 錯誤:', responseData.error);
                                 alert(`登入失敗:\n${responseData.error}\n\n詳細資訊:\n${responseData.details}`);
                             } else {
-                                // console.log('✅ Edge Function 登入成功:', responseData);
                                 if (responseData.user) {
-                                    // console.log('使用者資料:', responseData.user);
-                                    // 將使用者資料存入 localStorage
                                     localStorage.setItem('userProfile', JSON.stringify(responseData.user));
                                 }
                             }
                         } catch (fetchError) {
-                            // console.error('❌ Fetch 錯誤:', fetchError);
                             alert(`網路錯誤: ${fetchError}`);
                         }
-                    } else {
-                        // console.error('No ID token or profile found');
                     }
                 }
             } catch (error) {
@@ -151,18 +129,13 @@ const App = () => {
         localStorage.setItem('isLoggedIn', String(isLoggedIn));
     }, [isLoggedIn]);
 
-    // 持久化當前頁面到 localStorage
-    useEffect(() => {
-        localStorage.setItem('currentPage', currentPage);
-    }, [currentPage]);
-
-    // 頁面切換
+    // 頁面定義用於側邊選單
     const pages = {
-        home: '首頁',
-        games: '遊戲大廳',
-        deposit: '儲值',
-        activities: '活動中心',
-        member: '會員中心'
+        home: { label: '首頁', path: '/' },
+        games: { label: '遊戲大廳', path: '/games' },
+        deposit: { label: '儲值', path: '/deposit' },
+        activities: { label: '活動中心', path: '/activities' },
+        member: { label: '會員中心', path: '/member' }
     };
 
     // 遊戲分類
@@ -174,186 +147,23 @@ const App = () => {
         { id: 5, name: '棋牌遊戲', icon: '🃏', color: 'bg-green-400', dog: '🐕‍🦺' }
     ];
 
-    // 活動列表
-    const activities = [
-        {
-            id: 1,
-            title: '新會員首儲優惠',
-            bonus: '100%',
-            bonusAmount: '最高 $10,000',
-            time: '長期活動',
-            desc: '首次儲值即享100%紅利,最高贈送10,000元!',
-            rules: [
-                '僅限新會員首次儲值',
-                '最低儲值金額 $1,000',
-                '紅利需完成 20 倍流水',
-                '活動長期有效'
-            ],
-            steps: [
-                '完成會員註冊',
-                '進行首次儲值',
-                '系統自動發放紅利',
-                '開始遊戲享受優惠'
-            ],
-            icon: '🎉',
-            color: 'from-pink-400 to-rose-400'
-        },
-        {
-            id: 2,
-            title: '每日簽到送彩金',
-            bonus: '每日領',
-            bonusAmount: '最高 $888',
-            time: '24小時',
-            desc: '每天登入簽到,連續簽到獎勵翻倍!',
-            rules: [
-                '每日00:00重置簽到',
-                '連續簽到7天可獲得額外獎勵',
-                '中斷簽到則重新計算',
-                '彩金需完成 5 倍流水'
-            ],
-            steps: [
-                '每日登入平台',
-                '點擊簽到按鈕',
-                '領取當日獎勵',
-                '連續簽到獲得更多'
-            ],
-            icon: '📅',
-            color: 'from-blue-400 to-cyan-400'
-        },
-        {
-            id: 3,
-            title: '推薦好友送獎金',
-            bonus: '雙重送',
-            bonusAmount: '最高 $5,000',
-            time: '限時3天',
-            desc: '推薦好友註冊,雙方都能獲得豐厚獎勵!',
-            rules: [
-                '好友需使用您的推薦碼註冊',
-                '好友完成首儲後雙方獲得獎勵',
-                '推薦人最高可獲得 $5,000',
-                '被推薦人可獲得 $500 紅利'
-            ],
-            steps: [
-                '複製您的專屬推薦碼',
-                '分享給好友註冊使用',
-                '好友完成首次儲值',
-                '雙方自動獲得獎勵'
-            ],
-            icon: '👥',
-            color: 'from-purple-400 to-indigo-400'
-        },
-        {
-            id: 4,
-            title: '週年慶大放送',
-            bonus: '200%',
-            bonusAmount: '無上限',
-            time: '限時7天',
-            desc: '平台週年慶典,儲值滿千送千,上不封頂!',
-            rules: [
-                '活動期間內不限次數參加',
-                '單筆儲值滿 $1,000 即享優惠',
-                '紅利需完成 15 倍流水',
-                '2024-01-20 至 2024-01-27'
-            ],
-            steps: [
-                '於活動期間內儲值',
-                '單筆滿 $1,000',
-                '自動獲得雙倍紅利',
-                '可重複參加'
-            ],
-            icon: '🎊',
-            color: 'from-yellow-400 to-orange-400'
-        },
-        {
-            id: 5,
-            title: '每週返水優惠',
-            bonus: '1.2%',
-            bonusAmount: '無上限',
-            time: '每週結算',
-            desc: '每週自動計算返水,虧損也有補償!',
-            rules: [
-                '每週一自動結算上週返水',
-                '返水比例依據VIP等級',
-                '無需申請自動發放',
-                '返水無流水限制'
-            ],
-            steps: [
-                '正常進行遊戲投注',
-                '系統自動記錄流水',
-                '每週一計算返水',
-                '直接發放至帳戶'
-            ],
-            icon: '💰',
-            color: 'from-green-400 to-emerald-400'
-        },
-        {
-            id: 6,
-            title: '幸運轉盤抽獎',
-            bonus: '天天抽',
-            bonusAmount: '最高 $88,888',
-            time: '每日3次',
-            desc: '每日免費抽獎機會,大獎等你來拿!',
-            rules: [
-                '每日可免費抽獎 3 次',
-                '儲值可獲得額外抽獎次數',
-                '獎品包含現金、紅利、實體獎品',
-                '中獎後即時發放'
-            ],
-            steps: [
-                '進入轉盤抽獎頁面',
-                '點擊開始抽獎',
-                '等待轉盤停止',
-                '獲得獎勵'
-            ],
-            icon: '🎰',
-            color: 'from-red-400 to-pink-400'
-        }
-    ];
-
-    // 活動中心頁面
-    const ActivitiesPage = () => {
-        // 如果選擇了活動,顯示活動詳情
-        if (selectedActivity) {
-            const activity = activities.find(a => a.id === selectedActivity);
-            if (activity) {
-                return <ActivityDetailPage activity={activity} setSelectedActivity={setSelectedActivity} />;
-            }
-        }
-
-        // 活動列表頁面
-        return <ActivitiesListPage activities={activities} setSelectedActivity={setSelectedActivity} />;
-    };
-
-    // 會員中心頁面
-    const MemberPage = () => {
-        if (memberSubPage === 'profile') {
-            return <MemberProfilePage setMemberSubPage={setMemberSubPage} />;
-        }
-        if (memberSubPage === 'bets') {
-            return <MemberBetsPage setMemberSubPage={setMemberSubPage} />;
-        }
-        if (memberSubPage === 'transactions') {
-            return <MemberTransactionsPage setMemberSubPage={setMemberSubPage} />;
-        }
-        if (memberSubPage === 'promotions') {
-            return <MemberPromotionsPage setMemberSubPage={setMemberSubPage} />;
-        }
-        if (memberSubPage === 'vip') {
-            return <MemberVipPage setMemberSubPage={setMemberSubPage} />;
-        }
-
-        return <MemberMain setMemberSubPage={setMemberSubPage} />;
-    };
-
     const handleGameSelect = (game: any) => {
         if (game.id === 4) {
-            setCurrentPage('fishing');
+            navigate('/fishing');
         }
     };
 
-    if (isLoggedIn && currentPage === 'fishing') {
-        return <FishingGamePage onExit={() => setCurrentPage('games')} />;
-    }
+    // 判斷當前頁面標識 for sidebar styling
+    const getCurrentPageKey = () => {
+        const path = location.pathname;
+        if (path === '/') return 'home';
+        if (path.startsWith('/games')) return 'games';
+        if (path.startsWith('/deposit')) return 'deposit';
+        if (path.startsWith('/activities')) return 'activities';
+        if (path.startsWith('/member')) return 'member';
+        return 'home';
+    };
+    const currentPageKey = getCurrentPageKey();
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-blue-50 to-pink-50">
@@ -363,7 +173,10 @@ const App = () => {
                     isMobile={isMobile}
                     setIsLoggedIn={setIsLoggedIn}
                     setShowLogin={setShowLogin}
-                    setCurrentPage={setCurrentPage}
+                    setCurrentPage={(page) => {
+                        // Compatibility shim: LoginPage calls setCurrentPage('home')
+                        if (page === 'home') navigate('/');
+                    }}
                 />
             ) : !isLoggedIn ? (
                 // 未登入的訪客模式
@@ -387,14 +200,12 @@ const App = () => {
                     <div className="fixed top-4 right-4 z-50">
                         <button
                             onClick={() => {
-                                LiffService.logout(); // LIFF 登出
+                                LiffService.logout();
                                 setIsLoggedIn(false);
                                 setLiffUser(null);
                                 setShowLogin(false);
-                                setCurrentPage('home');
-                                // 清除 localStorage 中的登入狀態
+                                navigate('/');
                                 localStorage.removeItem('isLoggedIn');
-                                localStorage.removeItem('currentPage');
                             }}
                             className="px-4 py-2 rounded-lg font-bold text-sm bg-red-500 text-white hover:bg-red-600 shadow-md"
                         >
@@ -422,17 +233,36 @@ const App = () => {
                                 </div>
 
                                 {/* 頁面內容 */}
-                                {currentPage === 'home' && <HomePage setCurrentPage={setCurrentPage} gameCategories={gameCategories} onGameSelect={handleGameSelect} />}
-                                {currentPage === 'games' && <GamesPage gameCategories={gameCategories} onGameSelect={handleGameSelect} />}
-                                {currentPage === 'deposit' && <DepositPage />}
-                                {currentPage === 'activities' && <ActivitiesPage />}
-                                {currentPage === 'member' && <MemberPage />}
+                                <Routes>
+                                    <Route path="/" element={<HomePage setCurrentPage={(page) => { if (page === 'games') navigate('/games') }} gameCategories={gameCategories} onGameSelect={handleGameSelect} />} />
+                                    <Route path="/games" element={<GamesPage gameCategories={gameCategories} onGameSelect={handleGameSelect} />} />
+                                    <Route path="/deposit" element={<DepositPage />} />
+
+                                    <Route path="/activities" element={<ActivitiesListPage />} />
+                                    <Route path="/activities/:id" element={<ActivityDetailPage />} />
+
+                                    <Route path="/member" element={<MemberMain setMemberSubPage={(sub) => navigate(`/member/${sub === 'main' ? '' : sub}`)} />} />
+                                    <Route path="/member/profile" element={<MemberProfilePage setMemberSubPage={() => navigate('/member')} />} />
+                                    <Route path="/member/bets" element={<MemberBetsPage setMemberSubPage={() => navigate('/member')} />} />
+                                    <Route path="/member/transactions" element={<MemberTransactionsPage setMemberSubPage={() => navigate('/member')} />} />
+                                    <Route path="/member/promotions" element={<MemberPromotionsPage setMemberSubPage={() => navigate('/member')} />} />
+                                    <Route path="/member/vip" element={<MemberVipPage setMemberSubPage={() => navigate('/member')} />} />
+
+                                    <Route path="/fishing" element={<FishingGamePage onExit={() => navigate('/games')} />} />
+
+                                    <Route path="*" element={<Navigate to="/" replace />} />
+                                </Routes>
 
                                 {/* 底部導航 */}
-                                <BottomNav currentPage={currentPage} setCurrentPage={setCurrentPage} />
-
-                                {/* LINE 客服 */}
-                                <LineButton />
+                                {/* Only show bottom nav if not in fishing game? Originally: if (currentPage === 'fishing') return FishingGamePage */}
+                                {/* Now FishingGamePage is a route. But BottomNav is outside Routes. */}
+                                {/* We should probably hide BottomNav on Fishing Page. */}
+                                {location.pathname !== '/fishing' && (
+                                    <>
+                                        <BottomNav />
+                                        <LineButton />
+                                    </>
+                                )}
                             </>
                         ) : (
                             // 網頁版佈局
@@ -452,21 +282,20 @@ const App = () => {
                                     </div>
 
                                     <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
-                                        {Object.entries(pages).map(([key, label]) => (
+                                        {Object.entries(pages).map(([key, item]) => (
                                             <button
                                                 key={key}
-                                                onClick={() => setCurrentPage(key)}
-                                                className={`w-full text-left px-6 py-4 font-bold transition-colors ${currentPage === key
+                                                onClick={() => navigate(item.path)}
+                                                className={`w-full text-left px-6 py-4 font-bold transition-colors ${currentPageKey === key
                                                     ? 'bg-blue-500 text-white'
                                                     : 'text-gray-700 hover:bg-gray-50'
                                                     }`}
                                             >
-                                                {label}
+                                                {item.label}
                                             </button>
                                         ))}
                                     </div>
 
-                                    {/* LINE 客服 */}
                                     <div className="bg-green-500 rounded-3xl p-4 text-white shadow-lg">
                                         <div className="flex items-center space-x-3 mb-3">
                                             <MessageCircle size={24} />
@@ -486,11 +315,25 @@ const App = () => {
 
                                 {/* 主內容區 */}
                                 <div className="col-span-9">
-                                    {currentPage === 'home' && <HomePage setCurrentPage={setCurrentPage} gameCategories={gameCategories} onGameSelect={handleGameSelect} />}
-                                    {currentPage === 'games' && <GamesPage gameCategories={gameCategories} onGameSelect={handleGameSelect} />}
-                                    {currentPage === 'deposit' && <DepositPage />}
-                                    {currentPage === 'activities' && <ActivitiesPage />}
-                                    {currentPage === 'member' && <MemberPage />}
+                                    <Routes>
+                                        <Route path="/" element={<HomePage setCurrentPage={(page) => { if (page === 'games') navigate('/games') }} gameCategories={gameCategories} onGameSelect={handleGameSelect} />} />
+                                        <Route path="/games" element={<GamesPage gameCategories={gameCategories} onGameSelect={handleGameSelect} />} />
+                                        <Route path="/deposit" element={<DepositPage />} />
+
+                                        <Route path="/activities" element={<ActivitiesListPage />} />
+                                        <Route path="/activities/:id" element={<ActivityDetailPage />} />
+
+                                        <Route path="/member" element={<MemberMain setMemberSubPage={(sub) => navigate(`/member/${sub === 'main' ? '' : sub}`)} />} />
+                                        <Route path="/member/profile" element={<MemberProfilePage setMemberSubPage={() => navigate('/member')} />} />
+                                        <Route path="/member/bets" element={<MemberBetsPage setMemberSubPage={() => navigate('/member')} />} />
+                                        <Route path="/member/transactions" element={<MemberTransactionsPage setMemberSubPage={() => navigate('/member')} />} />
+                                        <Route path="/member/promotions" element={<MemberPromotionsPage setMemberSubPage={() => navigate('/member')} />} />
+                                        <Route path="/member/vip" element={<MemberVipPage setMemberSubPage={() => navigate('/member')} />} />
+
+                                        <Route path="/fishing" element={<FishingGamePage onExit={() => navigate('/games')} />} />
+
+                                        <Route path="*" element={<Navigate to="/" replace />} />
+                                    </Routes>
                                 </div>
                             </div>
                         )}

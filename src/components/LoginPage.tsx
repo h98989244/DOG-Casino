@@ -438,7 +438,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ isMobile, setIsLoggedIn, setShowL
                 <div className="mt-6 bg-white rounded-2xl p-4 shadow-md text-center">
                     <p className="text-sm text-gray-600 mb-2">遇到問題?</p>
                     <a
-                        href="https://line.me/ti/p/@your-line-id"
+                        href="https://line.me/ti/p/@525jjefs"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center space-x-2 text-green-500 font-bold hover:underline"
