@@ -26,6 +26,8 @@ import MemberPromotionsPage from './pages/Member/MemberPromotionsPage';
 import MemberVipPage from './pages/Member/MemberVipPage';
 
 import FishingGamePage from './pages/FishingGamePage';
+import SlotMythCoinPage from './pages/SlotMythCoinPage';
+
 
 const App = () => {
     // 從 localStorage 讀取登入狀態,如果沒有則預設為 false
@@ -215,10 +217,11 @@ const App = () => {
                         </div>
                     )}
 
-                    {/* 主容器 - 捕魚遊戲頁面使用特殊佈局 */}
-                    {location.pathname === '/fishing' ? (
+                    {/* 主容器 - 特殊遊戲頁面使用全螢幕佈局 */}
+                    {(location.pathname === '/fishing' || location.pathname === '/games/slot-myth-coin') ? (
                         <Routes>
                             <Route path="/fishing" element={<FishingGamePage onExit={() => navigate('/games')} />} />
+                            <Route path="/games/slot-myth-coin" element={<SlotMythCoinPage onExit={() => navigate('/games')} />} />
                         </Routes>
                     ) : (
                         <div className={`${isMobile ? 'max-w-md mx-auto' : 'max-w-6xl mx-auto pt-20'} p-4`}>
@@ -255,14 +258,14 @@ const App = () => {
                                         <Route path="/member/promotions" element={<MemberPromotionsPage setMemberSubPage={() => navigate('/member')} />} />
                                         <Route path="/member/vip" element={<MemberVipPage setMemberSubPage={() => navigate('/member')} />} />
 
+                                        <Route path="/games/slot-myth-coin" element={<SlotMythCoinPage onExit={() => navigate('/games')} />} />
+
                                         <Route path="*" element={<Navigate to="/" replace />} />
                                     </Routes>
 
                                     {/* 底部導航 */}
-                                    {/* Only show bottom nav if not in fishing game? Originally: if (currentPage === 'fishing') return FishingGamePage */}
-                                    {/* Now FishingGamePage is a route. But BottomNav is outside Routes. */}
-                                    {/* We should probably hide BottomNav on Fishing Page. */}
-                                    {location.pathname !== '/fishing' && (
+                                    {/* 在特殊遊戲頁面隱藏底部導航 */}
+                                    {location.pathname !== '/fishing' && location.pathname !== '/games/slot-myth-coin' && (
                                         <>
                                             <BottomNav />
                                             <LineButton />
@@ -334,6 +337,8 @@ const App = () => {
                                             <Route path="/member/transactions" element={<MemberTransactionsPage setMemberSubPage={() => navigate('/member')} />} />
                                             <Route path="/member/promotions" element={<MemberPromotionsPage setMemberSubPage={() => navigate('/member')} />} />
                                             <Route path="/member/vip" element={<MemberVipPage setMemberSubPage={() => navigate('/member')} />} />
+
+                                            <Route path="/games/slot-myth-coin" element={<SlotMythCoinPage onExit={() => navigate('/games')} />} />
 
                                             <Route path="*" element={<Navigate to="/" replace />} />
                                         </Routes>

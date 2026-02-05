@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神話金幣 Jackpot - 243 WAYS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Jackpot 顯示區 -->
+        <div class="jackpot-panel">
+            <div class="jackpot-grid">
+                <div class="jackpot-item grand">
+                    <div class="jackpot-label">GRAND</div>
+                    <div class="jackpot-value" id="jackpot-grand">50000</div>
+                </div>
+                <div class="jackpot-item major">
+                    <div class="jackpot-label">MAJOR</div>
+                    <div class="jackpot-value" id="jackpot-major">10000</div>
+                </div>
+                <div class="jackpot-item">
+                    <div class="jackpot-label">MAXI</div>
+                    <div class="jackpot-value" id="jackpot-maxi">5000</div>
+                </div>
+                <div class="jackpot-item">
+                    <div class="jackpot-label">MINOR</div>
+                    <div class="jackpot-value" id="jackpot-minor">1000</div>
+                </div>
+                <div class="jackpot-item">
+                    <div class="jackpot-label">MINI</div>
+                    <div class="jackpot-value" id="jackpot-mini">100</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 遊戲資訊列 -->
+        <div class="info-bar">
+            <div class="info-item">
+                <div class="info-label">餘額</div>
+                <div class="info-value" id="balance">10000</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">押注</div>
+                <div class="info-value" id="current-bet">100</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">贏分</div>
+                <div class="info-value" id="total-win">0</div>
+            </div>
+        </div>
+
+        <!-- 拉霸機主體 -->
+        <div class="slot-machine" id="slotMachine">
+            <div class="reels-container" id="reelsContainer"></div>
+
+            <!-- 事件 Overlay -->
+            <div class="event-overlay" id="eventOverlay">
+                <div class="event-text" id="eventText"></div>
+            </div>
+
+            <!-- Win 顯示 -->
+            <div class="win-display">
+                <div class="win-amount" id="winAmount"></div>
+            </div>
+
+            <!-- Free Game 計數器 -->
+            <div class="free-game-counter" id="freeGameCounter">
+                <span class="free-game-label">FREE GAME:</span>
+                <span class="free-game-value" id="freeGameValue">0 / 0</span>
+            </div>
+        </div>
+
+        <!-- 控制按鈕 -->
+        <div class="controls">
+            <div class="bet-controls">
+                <span class="bet-label">押注:</span>
+                <button class="btn btn-bet" onclick="game.decreaseBet()">-</button>
+                <span class="bet-label" id="betDisplay">100</span>
+                <button class="btn btn-bet" onclick="game.increaseBet()">+</button>
+            </div>
+
+            <button class="btn btn-spin" id="spinBtn" onclick="game.spin()">
+                🎰 旋轉
+            </button>
+
+            <button class="btn btn-auto" id="autoBtn" onclick="game.toggleAuto()">
+                自動旋轉
+            </button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+    <script>
+        // 頁面載入後初始化遊戲
+        window.addEventListener('DOMContentLoaded', () => {
+            initGame();
+        });
+    </script>
+</body>
+</html>

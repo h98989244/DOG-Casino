@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>神話金幣 Jackpot - 243 WAYS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial Black', 'Microsoft JhengHei', sans-serif;
+            background: 
+                radial-gradient(ellipse at top, rgba(25, 20, 60, 0.3), transparent 50%),
+                radial-gradient(ellipse at bottom, rgba(10, 5, 30, 0.5), transparent 50%),
+                linear-gradient(180deg, #0d0d1a 0%, #050510 50%, #0a0a15 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.03), transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(138, 43, 226, 0.02), transparent 40%);
+            pointer-events: none;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 1400px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Jackpot 顯示區 - 一體式金屬橫條 */
+        .jackpot-panel {
+            background: linear-gradient(180deg, #1a1a20 0%, #0f0f15 100%);
+            border-top: 1px solid rgba(212, 175, 55, 0.2);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+            padding: 12px 20px;
+            box-shadow: 
+                inset 0 1px 0 rgba(212, 175, 55, 0.1),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.5),
+                0 2px 10px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        
+        .jackpot-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(212, 175, 55, 0.3) 50%, 
+                transparent);
+        }
+
+        .jackpot-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .jackpot-item {
+            flex: 1;
+            text-align: center;
+            padding: 8px 15px;
+            background: transparent;
+            border: none;
+            position: relative;
+        }
+        
+        .jackpot-item::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 1px;
+            background: linear-gradient(180deg, 
+                transparent, 
+                rgba(212, 175, 55, 0.2) 50%, 
+                transparent);
+        }
+        
+        .jackpot-item:last-child::after {
+            display: none;
+        }
+
+        .jackpot-label {
+            font-size: 0.7rem;
+            color: rgba(212, 175, 55, 0.5);
+            font-weight: bold;
+            margin-bottom: 2px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        .jackpot-value {
+            font-size: 1.4rem;
+            color: #d4af37;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Jackpot 觸發時的高亮效果 */
+        .jackpot-item.triggered .jackpot-label {
+            color: #ffd700;
+            animation: jackpot-label-glow 0.3s ease-out;
+        }
+        
+        .jackpot-item.triggered .jackpot-value {
+            color: #ffd700;
+            text-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700;
+            animation: jackpot-value-glow 0.3s ease-out;
+        }
+
+        @keyframes jackpot-label-glow {
+            0% { color: rgba(212, 175, 55, 0.5); }
+            50% { color: #ffd700; }
+            100% { color: rgba(212, 175, 55, 0.5); }
+        }
+        
+        @keyframes jackpot-value-glow {
+            0% { 
+                color: #d4af37;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+            }
+            50% { 
+                color: #ffd700;
+                text-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700;
+            }
+            100% { 
+                color: #d4af37;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+            }
+        }
+
+        /* 移除個別 Jackpot 的顏色覆蓋 */
+        .jackpot-item.grand .jackpot-label,
+        .jackpot-item.major .jackpot-label { 
+            color: rgba(212, 175, 55, 0.5);
+        }
+        
+        .jackpot-item.grand .jackpot-value,
+        .jackpot-item.major .jackpot-value { 
+            color: #d4af37;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        /* 遊戲資訊列 */
+        .info-bar {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .info-item {
+            flex: 1;
+            background: linear-gradient(145deg, rgba(26, 26, 32, 0.6), rgba(15, 15, 21, 0.8));
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 8px;
+            padding: 12px 20px;
+            text-align: center;
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.03),
+                0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        .info-label {
+            color: rgba(212, 175, 55, 0.4);
+            font-size: 0.75rem;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-value {
+            color: #d4af37;
+            font-size: 1.4rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 拉霸機主體 */
+        .slot-machine {
+            background: linear-gradient(145deg, #1a1a24, #10101a);
+            border: 3px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            padding: 40px 30px 30px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.8),
+                inset 0 2px 4px rgba(0, 0, 0, 0.6),
+                inset 0 -1px 2px rgba(212, 175, 55, 0.1);
+            position: relative;
+        }
+        
+        .slot-machine::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(212, 175, 55, 0.2) 50%, 
+                transparent);
+            border-radius: 12px 12px 0 0;
+        }
+
+        .slot-machine.shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
+        }
+
+        /* 轉軸容器 */
+        .reels-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .reel {
+            position: relative;
+        }
+
+        .reel-window {
+            background: linear-gradient(180deg, #08080d, #0d0d15);
+            border: 2px solid rgba(212, 175, 55, 0.25);
+            border-radius: 6px;
+            height: 306px; /* 3 symbols × 102px - 降低15% */
+            overflow: hidden;
+            position: relative;
+            box-shadow: 
+                inset 0 0 30px rgba(0, 0, 0, 0.9),
+                inset 0 2px 4px rgba(0, 0, 0, 0.8),
+                0 2px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .reel-window::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(to bottom, rgba(8, 8, 13, 0.95), transparent);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .reel-window::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: linear-gradient(to top, rgba(8, 8, 13, 0.95), transparent);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .reel-strip {
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            transition: transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        .reel-strip.spinning {
+            animation: spin 0.08s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: translateY(0); }
+            to { transform: translateY(-306px); }
+        }
+
+        /* Symbol 樣式 - 更接近正方形 */
+        .symbol {
+            height: 102px; /* 減少15% */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 15, 20, 0.4);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.08);
+            position: relative;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+        }
+
+        .symbol-icon {
+            font-size: 2.8rem; /* Icon 更大 */
+            margin-bottom: 2px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+        }
+
+        .symbol-value {
+            font-size: 1rem; /* Value 更小 */
+            font-weight: bold;
+            color: rgba(212, 175, 55, 0.8);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+            font-family: 'Courier New', monospace;
+        }
+
+        .symbol.locked {
+            background: radial-gradient(circle at center, rgba(212, 175, 55, 0.15), rgba(15, 15, 20, 0.6));
+            border: 1px solid rgba(212, 175, 55, 0.4);
+            box-shadow: 
+                inset 0 0 15px rgba(212, 175, 55, 0.2),
+                0 0 10px rgba(212, 175, 55, 0.3);
+        }
+        
+        .symbol.locked .symbol-value {
+            color: #d4af37;
+        }
+
+        .symbol.winning {
+            animation: winning-pulse 0.4s ease-in-out 3;
+        }
+
+        @keyframes winning-pulse {
+            0%, 100% { 
+                transform: scale(1);
+                background: rgba(15, 15, 20, 0.4);
+            }
+            50% { 
+                transform: scale(1.08);
+                background: radial-gradient(circle, rgba(255, 215, 0, 0.3), rgba(15, 15, 20, 0.6));
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            }
+        }
+
+        .symbol .lock-indicator {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            font-size: 1.2rem;
+            filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.8));
+            opacity: 0.9;
+        }
+
+        /* Overlay 事件顯示 */
+        .event-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.95));
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            border-radius: 12px;
+            backdrop-filter: blur(3px);
+        }
+
+        .event-overlay.show {
+            display: flex;
+            animation: overlay-appear 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes overlay-appear {
+            0% { 
+                opacity: 0; 
+                transform: scale(0.3);
+            }
+            70% {
+                transform: scale(1.05);
+            }
+            100% { 
+                opacity: 1; 
+                transform: scale(1);
+            }
+        }
+
+        .event-text {
+            font-size: 5rem;
+            font-weight: 900;
+            text-align: center;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            position: relative;
+        }
+        
+        .event-text::before {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            filter: blur(20px);
+            opacity: 0.8;
+        }
+
+        .event-text.grand {
+            color: #ff00ff;
+            text-shadow: 
+                0 0 10px #ff00ff,
+                0 0 30px #ff00ff,
+                0 0 60px #ff00ff,
+                0 0 100px rgba(255, 0, 255, 0.5),
+                0 5px 10px rgba(0, 0, 0, 0.8);
+            animation: event-pulse-grand 1.2s ease-in-out infinite;
+        }
+        
+        @keyframes event-pulse-grand {
+            0%, 100% { 
+                transform: scale(1);
+                filter: brightness(1);
+            }
+            50% { 
+                transform: scale(1.05);
+                filter: brightness(1.3);
+            }
+        }
+
+        .event-text.major {
+            color: #ff8c00;
+            text-shadow: 
+                0 0 10px #ff6b00,
+                0 0 30px #ff6b00,
+                0 0 60px #ff6b00,
+                0 0 100px rgba(255, 107, 0, 0.5),
+                0 5px 10px rgba(0, 0, 0, 0.8);
+            animation: event-pulse-major 1s ease-in-out infinite;
+        }
+        
+        @keyframes event-pulse-major {
+            0%, 100% { 
+                transform: scale(1) rotate(-1deg);
+            }
+            50% { 
+                transform: scale(1.05) rotate(1deg);
+            }
+        }
+
+        .event-text.bigwin {
+            color: #ffd700;
+            text-shadow: 
+                0 0 10px #ffd700,
+                0 0 30px #ffd700,
+                0 0 60px rgba(255, 215, 0, 0.8),
+                0 0 100px rgba(255, 215, 0, 0.4),
+                0 5px 10px rgba(0, 0, 0, 0.8);
+            animation: event-pulse-bigwin 0.8s ease-in-out infinite;
+        }
+        
+        @keyframes event-pulse-bigwin {
+            0%, 100% { 
+                transform: scale(1);
+                letter-spacing: 8px;
+            }
+            50% { 
+                transform: scale(1.08);
+                letter-spacing: 12px;
+            }
+        }
+
+        /* Win 顯示 */
+        .win-display {
+            text-align: center;
+            margin-top: 25px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .win-amount {
+            font-size: 2.8rem;
+            color: #ffd700;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-shadow: 
+                0 0 20px rgba(255, 215, 0, 0.6),
+                0 2px 4px rgba(0, 0, 0, 0.8);
+            letter-spacing: 2px;
+        }
+
+        /* Free Game 計數器 */
+        .free-game-counter {
+            background: linear-gradient(145deg, rgba(255, 107, 0, 0.15), rgba(255, 69, 0, 0.2));
+            border: 2px solid rgba(255, 107, 0, 0.4);
+            border-radius: 10px;
+            padding: 12px 25px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 20px;
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .free-game-counter.active {
+            display: flex;
+            animation: free-game-appear 0.5s ease-out;
+        }
+        
+        @keyframes free-game-appear {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .free-game-label {
+            color: rgba(255, 215, 0, 0.9);
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .free-game-value {
+            color: #ffd700;
+            font-size: 1.8rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        /* 控制按鈕 */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            margin-top: 25px;
+        }
+
+        .bet-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(145deg, rgba(26, 26, 32, 0.8), rgba(15, 15, 21, 0.9));
+            padding: 10px 25px;
+            border-radius: 10px;
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            box-shadow: 
+                inset 0 1px 0 rgba(255, 255, 255, 0.05),
+                0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .bet-label {
+            color: rgba(212, 175, 55, 0.7);
+            font-weight: bold;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-bet {
+            background: linear-gradient(145deg, rgba(60, 60, 70, 0.8), rgba(40, 40, 50, 0.9));
+            color: #d4af37;
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            min-width: 45px;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+        }
+
+        .btn-bet:hover {
+            background: linear-gradient(145deg, rgba(70, 70, 80, 0.9), rgba(50, 50, 60, 1));
+            border-color: rgba(212, 175, 55, 0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+        }
+        
+        .btn-bet:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        .btn-spin {
+            background: linear-gradient(145deg, #d4af37, #b8941f);
+            color: #1a1a20;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            font-size: 1.2rem;
+            padding: 18px 50px;
+            box-shadow: 
+                0 6px 20px rgba(212, 175, 55, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-spin:hover:not(:disabled) {
+            background: linear-gradient(145deg, #e5c04a, #c9a52e);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 25px rgba(212, 175, 55, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+        
+        .btn-spin:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 
+                0 4px 15px rgba(212, 175, 55, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-spin:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: linear-gradient(145deg, #888, #666);
+            box-shadow: none;
+        }
+
+        .btn-auto {
+            background: linear-gradient(145deg, rgba(70, 90, 120, 0.8), rgba(50, 70, 100, 0.9));
+            color: rgba(212, 175, 55, 0.9);
+            border: 1px solid rgba(100, 150, 200, 0.4);
+            padding: 12px 28px;
+            box-shadow: 
+                0 4px 12px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .btn-auto:hover {
+            background: linear-gradient(145deg, rgba(80, 100, 130, 0.9), rgba(60, 80, 110, 1));
+            border-color: rgba(100, 150, 200, 0.6);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-auto.active {
+            background: linear-gradient(145deg, rgba(180, 50, 50, 0.8), rgba(140, 30, 30, 0.9));
+            color: #ffd700;
+            border-color: rgba(255, 100, 100, 0.5);
+            box-shadow: 
+                0 4px 12px rgba(180, 50, 50, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-auto.active:hover {
+            background: linear-gradient(145deg, rgba(200, 60, 60, 0.9), rgba(160, 40, 40, 1));
+            border-color: rgba(255, 100, 100, 0.7);
+        }
+
+        .btn-auto:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        /* 粒子效果 */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+            filter: drop-shadow(0 0 8px currentColor);
+        }
+
+        .particle.coin {
+            font-size: 2.5rem;
+            animation: particle-float 2.5s ease-out forwards;
+        }
+
+        .particle.lightning {
+            color: #00e5ff;
+            font-size: 3rem;
+            animation: lightning-flash 1.2s ease-out forwards;
+        }
+
+        @keyframes particle-float {
+            0% { 
+                transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(-350px) translateX(calc(var(--random-x, 0) * 100px)) rotate(1080deg) scale(0);
+                opacity: 0;
+            }
+        }
+
+        @keyframes lightning-flash {
+            0% { 
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            5%, 15%, 25%, 35%, 45% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            10%, 20%, 30%, 40%, 50% { 
+                opacity: 0.2;
+                transform: scale(0.9);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.5);
+            }
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 1024px) {
+            .game-container {
+                padding: 15px;
+            }
+            
+            .jackpot-value {
+                font-size: 1.2rem;
+            }
+            
+            .slot-machine {
+                padding: 30px 20px 25px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .jackpot-panel {
+                padding: 10px 15px;
+            }
+            
+            .jackpot-grid {
+                gap: 8px;
+            }
+
+            .jackpot-label {
+                font-size: 0.6rem;
+            }
+
+            .jackpot-value {
+                font-size: 1rem;
+            }
+            
+            .info-bar {
+                gap: 10px;
+            }
+            
+            .info-item {
+                padding: 10px 15px;
+            }
+            
+            .info-label {
+                font-size: 0.65rem;
+            }
+            
+            .info-value {
+                font-size: 1.2rem;
+            }
+            
+            .slot-machine {
+                padding: 25px 15px 20px;
+            }
+
+            .reel-window {
+                height: 255px; /* 3 × 85px */
+            }
+
+            .symbol {
+                height: 85px;
+            }
+
+            .symbol-icon {
+                font-size: 2.2rem;
+            }
+
+            .symbol-value {
+                font-size: 0.85rem;
+            }
+            
+            .symbol .lock-indicator {
+                font-size: 1rem;
+            }
+
+            @keyframes spin {
+                from { transform: translateY(0); }
+                to { transform: translateY(-255px); }
+            }
+
+            .event-text {
+                font-size: 2.8rem;
+                letter-spacing: 4px;
+            }
+            
+            .win-amount {
+                font-size: 2rem;
+            }
+            
+            .free-game-counter {
+                padding: 10px 20px;
+            }
+            
+            .free-game-label {
+                font-size: 0.85rem;
+            }
+            
+            .free-game-value {
+                font-size: 1.4rem;
+            }
+
+            .controls {
+                gap: 12px;
+            }
+            
+            .bet-controls {
+                padding: 8px 18px;
+                gap: 10px;
+            }
+            
+            .bet-label {
+                font-size: 0.85rem;
+            }
+
+            .btn-spin {
+                padding: 14px 35px;
+                font-size: 1rem;
+            }
+            
+            .btn-bet {
+                min-width: 40px;
+                padding: 8px 16px;
+                font-size: 1rem;
+            }
+            
+            .btn-auto {
+                padding: 10px 20px;
+                font-size: 0.9rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .jackpot-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+            
+            .jackpot-value {
+                font-size: 0.9rem;
+            }
+            
+            .event-text {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Jackpot 顯示區 -->
+        <div class="jackpot-panel">
+            <div class="jackpot-grid">
+                <div class="jackpot-item grand">
+                    <div class="jackpot-label">GRAND</div>
+                    <div class="jackpot-value" id="jackpot-grand">50000</div>
+                </div>
+                <div class="jackpot-item major">
+                    <div class="jackpot-label">MAJOR</div>
+                    <div class="jackpot-value" id="jackpot-major">10000</div>
+                </div>
+                <div class="jackpot-item">
+                    <div class="jackpot-label">MAXI</div>
+                    <div class="jackpot-value" id="jackpot-maxi">5000</div>
+                </div>
+                <div class="jackpot-item">
+                    <div class="jackpot-label">MINOR</div>
+                    <div class="jackpot-value" id="jackpot-minor">1000</div>
+                </div>
+                <div class="jackpot-item">
+                    <div class="jackpot-label">MINI</div>
+                    <div class="jackpot-value" id="jackpot-mini">100</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 遊戲資訊列 -->
+        <div class="info-bar">
+            <div class="info-item">
+                <div class="info-label">餘額</div>
+                <div class="info-value" id="balance">10000</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">押注</div>
+                <div class="info-value" id="current-bet">100</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">贏分</div>
+                <div class="info-value" id="total-win">0</div>
+            </div>
+        </div>
+
+        <!-- 拉霸機主體 -->
+        <div class="slot-machine" id="slotMachine">
+            <div class="reels-container" id="reelsContainer"></div>
+
+            <!-- 事件 Overlay -->
+            <div class="event-overlay" id="eventOverlay">
+                <div class="event-text" id="eventText"></div>
+            </div>
+
+            <!-- Win 顯示 -->
+            <div class="win-display">
+                <div class="win-amount" id="winAmount"></div>
+            </div>
+
+            <!-- Free Game 計數器 -->
+            <div class="free-game-counter" id="freeGameCounter">
+                <span class="free-game-label">FREE GAME:</span>
+                <span class="free-game-value" id="freeGameValue">0 / 0</span>
+            </div>
+        </div>
+
+        <!-- 控制按鈕 -->
+        <div class="controls">
+            <div class="bet-controls">
+                <span class="bet-label">押注:</span>
+                <button class="btn btn-bet" onclick="game.decreaseBet()">-</button>
+                <span class="bet-label" id="betDisplay">100</span>
+                <button class="btn btn-bet" onclick="game.increaseBet()">+</button>
+            </div>
+
+            <button class="btn btn-spin" id="spinBtn" onclick="game.spin()">
+                🎰 旋轉
+            </button>
+
+            <button class="btn btn-auto" id="autoBtn" onclick="game.toggleAuto()">
+                自動旋轉
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ==================== 遊戲配置 ====================
+        const CONFIG = {
+            // RTP 設定
+            RTP: 0.96,
+            
+            // 基本設定
+            REELS: 5,
+            ROWS: 3,
+            WAYS: 243, // 3^5 = 243 ways
+            
+            // Symbol 定義（金額型）
+            SYMBOLS: {
+                GOLD_HIGH: { icon: '💰', values: [3500, 1400, 350, 70], weight: 5 },
+                GOLD_MID: { icon: '🪙', values: [1400, 700, 175, 35], weight: 8 },
+                GOLD_LOW: { icon: '🏆', values: [700, 350, 140, 28], weight: 12 },
+                COIN_HIGH: { icon: '💎', values: [350, 175, 70, 14], weight: 15 },
+                COIN_MID: { icon: '💵', values: [175, 88, 35, 7], weight: 20 },
+                COIN_LOW: { icon: '🎁', values: [88, 44, 18, 4], weight: 25 },
+                WILD: { icon: '⚡', values: [0, 0, 0, 0], weight: 8, isWild: true },
+                SCATTER: { icon: '🔱', values: [0, 0, 0, 0], weight: 7, isScatter: true }
+            },
+            
+            // Jackpot 初始值
+            JACKPOT: {
+                GRAND: 50000,
+                MAJOR: 10000,
+                MAXI: 5000,
+                MINOR: 1000,
+                MINI: 100
+            },
+            
+            // Jackpot 增長速率（每次 Spin）
+            JACKPOT_INCREMENT: {
+                GRAND: 0.5,
+                MAJOR: 0.3,
+                MAXI: 0.2,
+                MINOR: 0.1,
+                MINI: 0.05
+            },
+            
+            // Free Game 設定
+            FREE_GAME: {
+                TRIGGER_SCATTERS: 3,
+                INITIAL_SPINS: 6,
+                RESET_SPINS: 6
+            },
+            
+            // 押注選項
+            BET_OPTIONS: [10, 50, 100, 200, 500, 1000, 2000]
+        };
+
+        // ==================== 主遊戲類 ====================
+        class SlotGame {
+            constructor() {
+                this.balance = 10000;
+                this.bet = 100;
+                this.currentBetIndex = 2;
+                this.isSpinning = false;
+                this.isAutoSpin = false; // 自動旋轉狀態
+                this.totalWin = 0;
+                
+                // Free Game 狀態
+                this.inFreeGame = false;
+                this.freeGameCurrent = 0;
+                this.freeGameTotal = 0;
+                this.lockedSymbols = []; // 5x3 陣列，記錄鎖定狀態
+                
+                // Jackpot
+                this.jackpots = { ...CONFIG.JACKPOT };
+                
+                this.initReels();
+                this.updateDisplay();
+                this.startJackpotIncrement();
+            }
+
+            // 初始化轉軸
+            initReels() {
+                const container = document.getElementById('reelsContainer');
+                container.innerHTML = '';
+                
+                this.lockedSymbols = [];
+                
+                for (let i = 0; i < CONFIG.REELS; i++) {
+                    this.lockedSymbols[i] = [null, null, null];
+                    
+                    const reel = document.createElement('div');
+                    reel.className = 'reel';
+                    
+                    const reelWindow = document.createElement('div');
+                    reelWindow.className = 'reel-window';
+                    
+                    const strip = document.createElement('div');
+                    strip.className = 'reel-strip';
+                    strip.id = `strip-${i}`;
+                    
+                    // 創建足夠的符號
+                    for (let j = 0; j < 30; j++) {
+                        strip.appendChild(this.createSymbolElement(this.getRandomSymbol()));
+                    }
+                    
+                    reelWindow.appendChild(strip);
+                    reel.appendChild(reelWindow);
+                    container.appendChild(reel);
+                }
+            }
+
+            // 創建符號元素
+            createSymbolElement(symbolData) {
+                const symbol = document.createElement('div');
+                symbol.className = 'symbol';
+                
+                const icon = document.createElement('div');
+                icon.className = 'symbol-icon';
+                icon.textContent = symbolData.icon;
+                
+                const value = document.createElement('div');
+                value.className = 'symbol-value';
+                
+                // 只有非特殊符號顯示數值
+                if (!symbolData.isWild && !symbolData.isScatter && symbolData.values) {
+                    // 隨機選擇一個數值（從最高到最低）
+                    const randomValue = symbolData.values[Math.floor(Math.random() * symbolData.values.length)];
+                    value.textContent = randomValue;
+                    symbol.dataset.value = randomValue;
+                } else {
+                    value.textContent = symbolData.isWild ? 'WILD' : symbolData.isScatter ? 'SCATTER' : '';
+                }
+                
+                symbol.dataset.type = symbolData.icon;
+                symbol.appendChild(icon);
+                symbol.appendChild(value);
+                
+                return symbol;
+            }
+
+            // 根據權重獲取隨機符號
+            getRandomSymbol() {
+                const weightedSymbols = [];
+                Object.values(CONFIG.SYMBOLS).forEach(symbol => {
+                    for (let i = 0; i < symbol.weight; i++) {
+                        weightedSymbols.push(symbol);
+                    }
+                });
+                return weightedSymbols[Math.floor(Math.random() * weightedSymbols.length)];
+            }
+
+            // 押注控制
+            increaseBet() {
+                if (this.isSpinning || this.inFreeGame || this.isAutoSpin) return;
+                if (this.currentBetIndex < CONFIG.BET_OPTIONS.length - 1) {
+                    this.currentBetIndex++;
+                    this.bet = CONFIG.BET_OPTIONS[this.currentBetIndex];
+                    this.updateDisplay();
+                }
+            }
+
+            decreaseBet() {
+                if (this.isSpinning || this.inFreeGame || this.isAutoSpin) return;
+                if (this.currentBetIndex > 0) {
+                    this.currentBetIndex--;
+                    this.bet = CONFIG.BET_OPTIONS[this.currentBetIndex];
+                    this.updateDisplay();
+                }
+            }
+
+            // 更新顯示
+            updateDisplay() {
+                document.getElementById('balance').textContent = Math.floor(this.balance);
+                document.getElementById('current-bet').textContent = this.bet;
+                document.getElementById('betDisplay').textContent = this.bet;
+                document.getElementById('total-win').textContent = Math.floor(this.totalWin);
+                
+                // 更新 Jackpot 顯示
+                Object.keys(this.jackpots).forEach(key => {
+                    const el = document.getElementById(`jackpot-${key.toLowerCase()}`);
+                    if (el) {
+                        this.animateNumber(el, this.jackpots[key]);
+                    }
+                });
+                
+                // Free Game 計數器
+                if (this.inFreeGame) {
+                    document.getElementById('freeGameCounter').classList.add('active');
+                    document.getElementById('freeGameValue').textContent = 
+                        `${this.freeGameCurrent} / ${this.freeGameTotal}`;
+                } else {
+                    document.getElementById('freeGameCounter').classList.remove('active');
+                }
+            }
+
+            // 數字動畫
+            animateNumber(element, targetValue, duration = 500) {
+                const start = parseFloat(element.textContent) || 0;
+                const end = targetValue;
+                const startTime = performance.now();
+                
+                const animate = (currentTime) => {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    const current = start + (end - start) * progress;
+                    element.textContent = Math.floor(current);
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    }
+                };
+                
+                requestAnimationFrame(animate);
+            }
+
+            // Jackpot 自動增長
+            startJackpotIncrement() {
+                setInterval(() => {
+                    Object.keys(this.jackpots).forEach(key => {
+                        this.jackpots[key] += CONFIG.JACKPOT_INCREMENT[key] * this.bet / 100;
+                    });
+                    this.updateDisplay();
+                }, 1000);
+            }
+
+            // 主旋轉函數
+            async spin() {
+                if (this.isSpinning) return;
+                
+                // 檢查餘額
+                if (!this.inFreeGame && this.balance < this.bet) {
+                    alert('餘額不足！');
+                    return;
+                }
+
+                this.isSpinning = true;
+                document.getElementById('spinBtn').disabled = true;
+                
+                // 扣除押注（Free Game 除外）
+                if (!this.inFreeGame) {
+                    this.balance -= this.bet;
+                    this.totalWin = 0;
+                    this.updateDisplay();
+                }
+
+                // 開始旋轉動畫
+                await this.startSpinAnimation();
+
+                // 生成結果
+                const result = this.generateResult();
+                
+                // 顯示結果
+                await this.showResult(result);
+
+                // 計算獎金（243 WAYS）
+                const winData = this.calculateWays(result);
+                
+                if (winData.totalWin > 0) {
+                    await this.showWin(winData);
+                }
+
+                // 檢查 Scatter（觸發 Free Game）
+                const scatterCount = this.countScatters(result);
+                if (scatterCount >= CONFIG.FREE_GAME.TRIGGER_SCATTERS && !this.inFreeGame) {
+                    await this.triggerFreeGame();
+                }
+
+                // Free Game 邏輯
+                if (this.inFreeGame) {
+                    await this.handleFreeGameLogic(result);
+                }
+
+                this.isSpinning = false;
+                document.getElementById('spinBtn').disabled = false;
+
+                // 自動旋轉邏輯
+                if (this.isAutoSpin && !this.inFreeGame && this.balance >= this.bet) {
+                    setTimeout(() => this.spin(), 1000);
+                } else if (this.isAutoSpin && (this.balance < this.bet)) {
+                    // 餘額不足，自動停止
+                    this.toggleAuto();
+                }
+            }
+
+            // 旋轉動畫
+            async startSpinAnimation() {
+                const strips = document.querySelectorAll('.reel-strip');
+                
+                // 只旋轉未鎖定的軸
+                strips.forEach((strip, index) => {
+                    if (this.inFreeGame) {
+                        // 檢查此軸是否有任何鎖定
+                        const hasLocked = this.lockedSymbols[index].some(s => s !== null);
+                        if (hasLocked) return; // 跳過有鎖定符號的軸
+                    }
+                    strip.classList.add('spinning');
+                });
+                
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+
+            // 生成結果
+            generateResult() {
+                const result = [];
+                for (let i = 0; i < CONFIG.REELS; i++) {
+                    const reelSymbols = [];
+                    for (let j = 0; j < CONFIG.ROWS; j++) {
+                        // Free Game：使用鎖定的符號或生成新符號
+                        if (this.inFreeGame && this.lockedSymbols[i][j]) {
+                            reelSymbols.push(this.lockedSymbols[i][j]);
+                        } else {
+                            const symbolData = this.getRandomSymbol();
+                            const symbolElement = this.createSymbolElement(symbolData);
+                            reelSymbols.push({
+                                icon: symbolData.icon,
+                                value: symbolElement.dataset.value || 0,
+                                isWild: symbolData.isWild,
+                                isScatter: symbolData.isScatter
+                            });
+                        }
+                    }
+                    result.push(reelSymbols);
+                }
+                return result;
+            }
+
+            // 顯示結果
+            async showResult(result) {
+                for (let i = 0; i < CONFIG.REELS; i++) {
+                    const strip = document.getElementById(`strip-${i}`);
+                    strip.classList.remove('spinning');
+                    
+                    const symbols = strip.querySelectorAll('.symbol');
+                    for (let j = 0; j < CONFIG.ROWS; j++) {
+                        const symbolData = result[i][j];
+                        
+                        if (symbols[j]) {
+                            symbols[j].querySelector('.symbol-icon').textContent = symbolData.icon;
+                            symbols[j].querySelector('.symbol-value').textContent = 
+                                symbolData.isWild ? 'WILD' : 
+                                symbolData.isScatter ? 'SCATTER' : 
+                                symbolData.value || '';
+                            symbols[j].dataset.type = symbolData.icon;
+                            symbols[j].dataset.value = symbolData.value || 0;
+                            symbols[j].classList.remove('winning', 'locked');
+                            
+                            // 顯示鎖定標記
+                            if (this.lockedSymbols[i][j]) {
+                                symbols[j].classList.add('locked');
+                                const lockIndicator = symbols[j].querySelector('.lock-indicator') || 
+                                    document.createElement('div');
+                                lockIndicator.className = 'lock-indicator';
+                                lockIndicator.textContent = '🔒';
+                                if (!symbols[j].querySelector('.lock-indicator')) {
+                                    symbols[j].appendChild(lockIndicator);
+                                }
+                            }
+                        }
+                    }
+                    
+                    strip.style.transform = 'translateY(0)';
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                }
+            }
+
+            // 計算 243 WAYS 獎金
+            calculateWays(result) {
+                let totalWin = 0;
+                const winningSymbols = [];
+
+                // 從第一軸開始，計算所有可能的連線
+                const firstReelSymbols = new Set();
+                result[0].forEach(sym => {
+                    if (!sym.isScatter) {
+                        firstReelSymbols.add(sym.isWild ? 'WILD' : sym.icon);
+                    }
+                });
+
+                firstReelSymbols.forEach(baseSymbol => {
+                    let consecutiveReels = 1;
+                    const matchedPositions = [[0, 1, 2]]; // 第一軸所有位置
+
+                    // 檢查後續軸
+                    for (let reel = 1; reel < CONFIG.REELS; reel++) {
+                        const matchingRows = [];
+                        
+                        result[reel].forEach((sym, row) => {
+                            if (sym.isWild || (!sym.isScatter && sym.icon === baseSymbol)) {
+                                matchingRows.push(row);
+                            }
+                        });
+
+                        if (matchingRows.length > 0) {
+                            consecutiveReels++;
+                            matchedPositions.push(matchingRows);
+                        } else {
+                            break;
+                        }
+                    }
+
+                    // 至少 3 軸才算中獎
+                    if (consecutiveReels >= 3) {
+                        // 計算所有 ways 的組合數
+                        let ways = 1;
+                        matchedPositions.forEach(positions => {
+                            ways *= positions.length;
+                        });
+
+                        // 計算此連線的總獎金
+                        const symbolValue = this.getSymbolValue(result, baseSymbol, matchedPositions);
+                        const lineWin = symbolValue * ways;
+                        totalWin += lineWin;
+
+                        // 記錄中獎位置
+                        matchedPositions.forEach((rows, reelIndex) => {
+                            rows.forEach(row => {
+                                winningSymbols.push({ reel: reelIndex, row });
+                            });
+                        });
+                    }
+                });
+
+                return { totalWin, winningSymbols };
+            }
+
+            // 獲取符號數值（從實際盤面）
+            getSymbolValue(result, baseSymbol, matchedPositions) {
+                let totalValue = 0;
+                let count = 0;
+
+                matchedPositions.forEach((rows, reelIndex) => {
+                    rows.forEach(row => {
+                        const sym = result[reelIndex][row];
+                        if (!sym.isWild && !sym.isScatter) {
+                            totalValue += parseFloat(sym.value) || 0;
+                            count++;
+                        }
+                    });
+                });
+
+                return count > 0 ? totalValue / count : 0;
+            }
+
+            // 計算 Scatter 數量
+            countScatters(result) {
+                let count = 0;
+                result.forEach(reel => {
+                    reel.forEach(sym => {
+                        if (sym.isScatter) count++;
+                    });
+                });
+                return count;
+            }
+
+            // 顯示獎金
+            async showWin(winData) {
+                const { totalWin, winningSymbols } = winData;
+
+                // 標記中獎符號
+                winningSymbols.forEach(({ reel, row }) => {
+                    const strip = document.getElementById(`strip-${reel}`);
+                    const symbols = strip.querySelectorAll('.symbol');
+                    if (symbols[row]) {
+                        symbols[row].classList.add('winning');
+                    }
+                });
+
+                // 動畫累加獎金
+                const finalWin = totalWin * this.bet;
+                this.totalWin += finalWin;
+                this.balance += finalWin;
+                
+                await this.animateWinAmount(finalWin);
+                this.updateDisplay();
+
+                // 檢查大獎
+                if (finalWin >= this.bet * 50) {
+                    await this.showEvent('BIG WIN', 'bigwin');
+                    this.createParticles('coin');
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 1500));
+            }
+
+            // Win 金額動畫
+            async animateWinAmount(amount) {
+                const el = document.getElementById('winAmount');
+                const duration = 1000;
+                const steps = 30;
+                const increment = amount / steps;
+                
+                for (let i = 0; i <= steps; i++) {
+                    el.textContent = `+${Math.floor(increment * i)}`;
+                    await new Promise(resolve => setTimeout(resolve, duration / steps));
+                }
+                
+                el.textContent = `+${Math.floor(amount)}`;
+            }
+
+            // 顯示事件 Overlay
+            async showEvent(text, className) {
+                const overlay = document.getElementById('eventOverlay');
+                const eventText = document.getElementById('eventText');
+                
+                eventText.textContent = text;
+                eventText.className = `event-text ${className}`;
+                overlay.classList.add('show');
+                
+                document.getElementById('slotMachine').classList.add('shake');
+                this.createParticles('lightning');
+                
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                
+                overlay.classList.remove('show');
+                document.getElementById('slotMachine').classList.remove('shake');
+            }
+
+            // 創建粒子效果
+            createParticles(type) {
+                const particleCount = type === 'coin' ? 30 : 15;
+                const particleIcon = type === 'coin' ? '💰' : '⚡';
+                
+                for (let i = 0; i < particleCount; i++) {
+                    setTimeout(() => {
+                        const particle = document.createElement('div');
+                        particle.className = `particle ${type}`;
+                        particle.textContent = particleIcon;
+                        particle.style.left = (Math.random() * window.innerWidth) + 'px';
+                        particle.style.top = (window.innerHeight / 2) + 'px';
+                        document.body.appendChild(particle);
+
+                        setTimeout(() => particle.remove(), 2000);
+                    }, i * 100);
+                }
+            }
+
+            // 觸發 Free Game
+            async triggerFreeGame() {
+                this.inFreeGame = true;
+                this.freeGameCurrent = CONFIG.FREE_GAME.INITIAL_SPINS;
+                this.freeGameTotal = CONFIG.FREE_GAME.INITIAL_SPINS;
+                
+                await this.showEvent('FREE GAME!', 'major');
+                this.updateDisplay();
+            }
+
+            // Free Game 邏輯
+            async handleFreeGameLogic(result) {
+                // 檢查是否有新的金額符號
+                let hasNewValues = false;
+                
+                result.forEach((reel, reelIndex) => {
+                    reel.forEach((sym, row) => {
+                        if (!sym.isWild && !sym.isScatter && sym.value > 0) {
+                            if (!this.lockedSymbols[reelIndex][row]) {
+                                this.lockedSymbols[reelIndex][row] = sym;
+                                hasNewValues = true;
+                            }
+                        }
+                    });
+                });
+
+                // 如果有新金額，重置回合數
+                if (hasNewValues) {
+                    this.freeGameCurrent = CONFIG.FREE_GAME.RESET_SPINS;
+                    this.freeGameTotal = CONFIG.FREE_GAME.RESET_SPINS;
+                }
+
+                this.freeGameCurrent--;
+                this.updateDisplay();
+
+                // Free Game 結束
+                if (this.freeGameCurrent <= 0) {
+                    await this.endFreeGame();
+                }
+            }
+
+            // 結束 Free Game
+            async endFreeGame() {
+                // 計算所有鎖定符號的總金額
+                let totalValue = 0;
+                this.lockedSymbols.forEach(reel => {
+                    reel.forEach(sym => {
+                        if (sym && sym.value) {
+                            totalValue += parseFloat(sym.value);
+                        }
+                    });
+                });
+
+                const finalWin = totalValue * this.bet;
+                this.balance += finalWin;
+                this.totalWin += finalWin;
+
+                await this.showEvent(`TOTAL WIN: ${Math.floor(finalWin)}`, 'bigwin');
+
+                // 檢查 Jackpot 觸發
+                await this.checkJackpotTrigger(totalValue);
+
+                // 重置
+                this.inFreeGame = false;
+                this.lockedSymbols = [];
+                this.initReels();
+                this.updateDisplay();
+            }
+
+            // 檢查 Jackpot 觸發
+            async checkJackpotTrigger(totalValue) {
+                // 簡單機率判定（可自行調整）
+                const rand = Math.random();
+                
+                if (totalValue >= 10000 && rand < 0.1) {
+                    await this.triggerJackpot('GRAND');
+                } else if (totalValue >= 5000 && rand < 0.2) {
+                    await this.triggerJackpot('MAJOR');
+                } else if (totalValue >= 2000 && rand < 0.3) {
+                    await this.triggerJackpot('MAXI');
+                }
+            }
+
+            // 觸發 Jackpot
+            async triggerJackpot(level) {
+                const amount = this.jackpots[level];
+                this.balance += amount;
+                
+                await this.showEvent(`${level} JACKPOT!`, level.toLowerCase());
+                
+                // 重置 Jackpot
+                this.jackpots[level] = CONFIG.JACKPOT[level];
+                this.updateDisplay();
+            }
+
+            // 切換自動旋轉
+            toggleAuto() {
+                if (this.isSpinning || this.inFreeGame) return;
+                
+                this.isAutoSpin = !this.isAutoSpin;
+                const btn = document.getElementById('autoBtn');
+                
+                if (this.isAutoSpin) {
+                    btn.classList.add('active');
+                    btn.textContent = '停止自動';
+                    // 立即開始第一次旋轉
+                    if (!this.isSpinning) {
+                        this.spin();
+                    }
+                } else {
+                    btn.classList.remove('active');
+                    btn.textContent = '自動旋轉';
+                }
+            }
+        }
+
+        // ==================== 初始化遊戲 ====================
+        const game = new SlotGame();
+
+        // 防止右鍵
+        document.addEventListener('contextmenu', e => e.preventDefault());
+    </script>
+</body>
+</html>
