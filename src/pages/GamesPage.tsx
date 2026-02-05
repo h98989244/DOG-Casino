@@ -47,7 +47,7 @@ const GamesPage: React.FC<GamesPageProps> = ({ gameCategories, onGameSelect }) =
             </div>
 
             {/* 註冊的遊戲列表 */}
-            {registeredGames.length > 0 && (
+            {/* {registeredGames.length > 0 && (
                 <>
                     <h2 className="text-xl font-bold text-gray-800 flex items-center mt-6">
                         <span className="mr-2">🎰</span>
@@ -75,7 +75,7 @@ const GamesPage: React.FC<GamesPageProps> = ({ gameCategories, onGameSelect }) =
                         ))}
                     </div>
                 </>
-            )}
+            )} */}
         </div>
     );
 };
