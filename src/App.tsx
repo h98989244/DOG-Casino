@@ -150,7 +150,11 @@ const App = () => {
     ];
 
     const handleGameSelect = (game: any) => {
-        if (game.id === 4) {
+        if (game.id === 3) {
+            // 電子遊戲 - 導向拉霸遊戲
+            navigate('/games/slot-myth-coin');
+        } else if (game.id === 4) {
+            // 捕魚遊戲
             navigate('/fishing');
         }
     };
