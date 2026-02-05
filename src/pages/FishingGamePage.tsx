@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { GameCanvas } from '../components/FishingGame/GameCanvas';
 import { GameUI } from '../components/FishingGame/GameUI';
+import { OrientationGuard } from '../components/FishingGame/OrientationGuard';
 import { FishingEngine } from '../game/fishing/FishingEngine';
 import { CONFIG } from '../game/fishing/Constants';
 
@@ -75,25 +76,27 @@ const FishingGamePage: React.FC<FishingGamePageProps> = ({ onExit }) => {
 
 
     return (
-        <div className="relative w-full h-screen overflow-hidden bg-black">
-            <GameCanvas
-                onEngineInit={handleEngineInit}
-                onEngineDestroy={handleEngineDestroy}
-                onCoinsChange={handleCoinsChange}
-                onToast={showToast}
-            />
-            <GameUI
-                balance={balance}
-                currentBet={currentBet}
-                isAutoFire={isAutoFire}
-                isLocked={isLocked}
-                onToggleAutoFire={handleToggleAutoFire}
-                onToggleLock={handleToggleLock}
-                onChangeBet={handleChangeBet}
-                onExit={onExit}
-                toastMessage={toastMessage}
-            />
-        </div>
+        <OrientationGuard>
+            <div className="fixed inset-0 w-full h-full overflow-hidden bg-black z-[9998]">
+                <GameCanvas
+                    onEngineInit={handleEngineInit}
+                    onEngineDestroy={handleEngineDestroy}
+                    onCoinsChange={handleCoinsChange}
+                    onToast={showToast}
+                />
+                <GameUI
+                    balance={balance}
+                    currentBet={currentBet}
+                    isAutoFire={isAutoFire}
+                    isLocked={isLocked}
+                    onToggleAutoFire={handleToggleAutoFire}
+                    onToggleLock={handleToggleLock}
+                    onChangeBet={handleChangeBet}
+                    onExit={onExit}
+                    toastMessage={toastMessage}
+                />
+            </div>
+        </OrientationGuard>
     );
 };
 

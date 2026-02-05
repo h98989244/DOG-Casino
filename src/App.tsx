@@ -196,125 +196,50 @@ const App = () => {
             ) : (
                 // 已登入的主要內容
                 <>
-                    {/* 登出按鈕 */}
-                    <div className="fixed top-4 right-4 z-50">
-                        <button
-                            onClick={() => {
-                                LiffService.logout();
-                                setIsLoggedIn(false);
-                                setLiffUser(null);
-                                setShowLogin(false);
-                                navigate('/');
-                                localStorage.removeItem('isLoggedIn');
-                            }}
-                            className="px-4 py-2 rounded-lg font-bold text-sm bg-red-500 text-white hover:bg-red-600 shadow-md"
-                        >
-                            登出
-                        </button>
-                    </div>
+                    {/* 登出按鈕 - 在捕魚遊戲頁面隱藏 */}
+                    {location.pathname !== '/fishing' && (
+                        <div className="fixed top-4 right-4 z-50">
+                            <button
+                                onClick={() => {
+                                    LiffService.logout();
+                                    setIsLoggedIn(false);
+                                    setLiffUser(null);
+                                    setShowLogin(false);
+                                    navigate('/');
+                                    localStorage.removeItem('isLoggedIn');
+                                }}
+                                className="px-4 py-2 rounded-lg font-bold text-sm bg-red-500 text-white hover:bg-red-600 shadow-md"
+                            >
+                                登出
+                            </button>
+                        </div>
+                    )}
 
-                    {/* 主容器 */}
-                    <div className={`${isMobile ? 'max-w-md mx-auto' : 'max-w-6xl mx-auto pt-20'} p-4`}>
-                        {isMobile ? (
-                            <>
-                                {/* 手機版頂部 */}
-                                <div className="mb-4 bg-white rounded-2xl p-4 shadow-md flex items-center justify-between">
-                                    <div className="flex items-center space-x-2">
-                                        {liffUser?.pictureUrl ? (
-                                            <img src={liffUser.pictureUrl} alt={liffUser.displayName} className="w-10 h-10 rounded-full" />
-                                        ) : (
-                                            <div className="text-3xl">🐶</div>
-                                        )}
-                                        <div>
-                                            <h1 className="font-bold text-gray-800">{liffUser ? liffUser.displayName : '汪汪娛樂城'}</h1>
-                                            <p className="text-xs text-gray-500">安全 · 快速 · 可靠</p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* 頁面內容 */}
-                                <Routes>
-                                    <Route path="/" element={<HomePage setCurrentPage={(page) => { if (page === 'games') navigate('/games') }} gameCategories={gameCategories} onGameSelect={handleGameSelect} />} />
-                                    <Route path="/games" element={<GamesPage gameCategories={gameCategories} onGameSelect={handleGameSelect} />} />
-                                    <Route path="/deposit" element={<DepositPage />} />
-
-                                    <Route path="/activities" element={<ActivitiesListPage />} />
-                                    <Route path="/activities/:id" element={<ActivityDetailPage />} />
-
-                                    <Route path="/member" element={<MemberMain setMemberSubPage={(sub) => navigate(`/member/${sub === 'main' ? '' : sub}`)} />} />
-                                    <Route path="/member/profile" element={<MemberProfilePage setMemberSubPage={() => navigate('/member')} />} />
-                                    <Route path="/member/bets" element={<MemberBetsPage setMemberSubPage={() => navigate('/member')} />} />
-                                    <Route path="/member/transactions" element={<MemberTransactionsPage setMemberSubPage={() => navigate('/member')} />} />
-                                    <Route path="/member/promotions" element={<MemberPromotionsPage setMemberSubPage={() => navigate('/member')} />} />
-                                    <Route path="/member/vip" element={<MemberVipPage setMemberSubPage={() => navigate('/member')} />} />
-
-                                    <Route path="/fishing" element={<FishingGamePage onExit={() => navigate('/games')} />} />
-
-                                    <Route path="*" element={<Navigate to="/" replace />} />
-                                </Routes>
-
-                                {/* 底部導航 */}
-                                {/* Only show bottom nav if not in fishing game? Originally: if (currentPage === 'fishing') return FishingGamePage */}
-                                {/* Now FishingGamePage is a route. But BottomNav is outside Routes. */}
-                                {/* We should probably hide BottomNav on Fishing Page. */}
-                                {location.pathname !== '/fishing' && (
-                                    <>
-                                        <BottomNav />
-                                        <LineButton />
-                                    </>
-                                )}
-                            </>
-                        ) : (
-                            // 網頁版佈局
-                            <div className="grid grid-cols-12 gap-6">
-                                {/* 左側選單 */}
-                                <div className="col-span-3 space-y-4">
-                                    <div className="bg-white rounded-3xl p-6 shadow-lg">
-                                        <div className="flex justify-center mb-3">
+                    {/* 主容器 - 捕魚遊戲頁面使用特殊佈局 */}
+                    {location.pathname === '/fishing' ? (
+                        <Routes>
+                            <Route path="/fishing" element={<FishingGamePage onExit={() => navigate('/games')} />} />
+                        </Routes>
+                    ) : (
+                        <div className={`${isMobile ? 'max-w-md mx-auto' : 'max-w-6xl mx-auto pt-20'} p-4`}>
+                            {isMobile ? (
+                                <>
+                                    {/* 手機版頂部 */}
+                                    <div className="mb-4 bg-white rounded-2xl p-4 shadow-md flex items-center justify-between">
+                                        <div className="flex items-center space-x-2">
                                             {liffUser?.pictureUrl ? (
-                                                <img src={liffUser.pictureUrl} alt={liffUser.displayName} className="w-20 h-20 rounded-full object-cover border-4 border-blue-100" />
+                                                <img src={liffUser.pictureUrl} alt={liffUser.displayName} className="w-10 h-10 rounded-full" />
                                             ) : (
-                                                <div className="text-5xl">🐶</div>
+                                                <div className="text-3xl">🐶</div>
                                             )}
+                                            <div>
+                                                <h1 className="font-bold text-gray-800">{liffUser ? liffUser.displayName : '汪汪娛樂城'}</h1>
+                                                <p className="text-xs text-gray-500">安全 · 快速 · 可靠</p>
+                                            </div>
                                         </div>
-                                        <h1 className="text-xl font-bold text-center text-gray-800 mb-2">{liffUser ? liffUser.displayName : '汪汪娛樂城'}</h1>
-                                        <p className="text-xs text-center text-gray-500">天天開心玩、狗狗陪你贏</p>
                                     </div>
 
-                                    <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
-                                        {Object.entries(pages).map(([key, item]) => (
-                                            <button
-                                                key={key}
-                                                onClick={() => navigate(item.path)}
-                                                className={`w-full text-left px-6 py-4 font-bold transition-colors ${currentPageKey === key
-                                                    ? 'bg-blue-500 text-white'
-                                                    : 'text-gray-700 hover:bg-gray-50'
-                                                    }`}
-                                            >
-                                                {item.label}
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    <div className="bg-green-500 rounded-3xl p-4 text-white shadow-lg">
-                                        <div className="flex items-center space-x-3 mb-3">
-                                            <MessageCircle size={24} />
-                                            <span className="font-bold">LINE 客服</span>
-                                        </div>
-                                        <p className="text-sm mb-3 opacity-90">即時線上為您服務</p>
-                                        <a
-                                            href="https://line.me/ti/p/@386qduvb"
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="block w-full bg-white text-green-600 py-2 rounded-xl font-bold hover:scale-105 transition-transform text-center"
-                                        >
-                                            立即聯繫
-                                        </a>
-                                    </div>
-                                </div>
-
-                                {/* 主內容區 */}
-                                <div className="col-span-9">
+                                    {/* 頁面內容 */}
                                     <Routes>
                                         <Route path="/" element={<HomePage setCurrentPage={(page) => { if (page === 'games') navigate('/games') }} gameCategories={gameCategories} onGameSelect={handleGameSelect} />} />
                                         <Route path="/games" element={<GamesPage gameCategories={gameCategories} onGameSelect={handleGameSelect} />} />
@@ -330,14 +255,93 @@ const App = () => {
                                         <Route path="/member/promotions" element={<MemberPromotionsPage setMemberSubPage={() => navigate('/member')} />} />
                                         <Route path="/member/vip" element={<MemberVipPage setMemberSubPage={() => navigate('/member')} />} />
 
-                                        <Route path="/fishing" element={<FishingGamePage onExit={() => navigate('/games')} />} />
-
                                         <Route path="*" element={<Navigate to="/" replace />} />
                                     </Routes>
+
+                                    {/* 底部導航 */}
+                                    {/* Only show bottom nav if not in fishing game? Originally: if (currentPage === 'fishing') return FishingGamePage */}
+                                    {/* Now FishingGamePage is a route. But BottomNav is outside Routes. */}
+                                    {/* We should probably hide BottomNav on Fishing Page. */}
+                                    {location.pathname !== '/fishing' && (
+                                        <>
+                                            <BottomNav />
+                                            <LineButton />
+                                        </>
+                                    )}
+                                </>
+                            ) : (
+                                // 網頁版佈局
+                                <div className="grid grid-cols-12 gap-6">
+                                    {/* 左側選單 */}
+                                    <div className="col-span-3 space-y-4">
+                                        <div className="bg-white rounded-3xl p-6 shadow-lg">
+                                            <div className="flex justify-center mb-3">
+                                                {liffUser?.pictureUrl ? (
+                                                    <img src={liffUser.pictureUrl} alt={liffUser.displayName} className="w-20 h-20 rounded-full object-cover border-4 border-blue-100" />
+                                                ) : (
+                                                    <div className="text-5xl">🐶</div>
+                                                )}
+                                            </div>
+                                            <h1 className="text-xl font-bold text-center text-gray-800 mb-2">{liffUser ? liffUser.displayName : '汪汪娛樂城'}</h1>
+                                            <p className="text-xs text-center text-gray-500">天天開心玩、狗狗陪你贏</p>
+                                        </div>
+
+                                        <div className="bg-white rounded-3xl shadow-lg overflow-hidden">
+                                            {Object.entries(pages).map(([key, item]) => (
+                                                <button
+                                                    key={key}
+                                                    onClick={() => navigate(item.path)}
+                                                    className={`w-full text-left px-6 py-4 font-bold transition-colors ${currentPageKey === key
+                                                        ? 'bg-blue-500 text-white'
+                                                        : 'text-gray-700 hover:bg-gray-50'
+                                                        }`}
+                                                >
+                                                    {item.label}
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        <div className="bg-green-500 rounded-3xl p-4 text-white shadow-lg">
+                                            <div className="flex items-center space-x-3 mb-3">
+                                                <MessageCircle size={24} />
+                                                <span className="font-bold">LINE 客服</span>
+                                            </div>
+                                            <p className="text-sm mb-3 opacity-90">即時線上為您服務</p>
+                                            <a
+                                                href="https://line.me/ti/p/@386qduvb"
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="block w-full bg-white text-green-600 py-2 rounded-xl font-bold hover:scale-105 transition-transform text-center"
+                                            >
+                                                立即聯繫
+                                            </a>
+                                        </div>
+                                    </div>
+
+                                    {/* 主內容區 */}
+                                    <div className="col-span-9">
+                                        <Routes>
+                                            <Route path="/" element={<HomePage setCurrentPage={(page) => { if (page === 'games') navigate('/games') }} gameCategories={gameCategories} onGameSelect={handleGameSelect} />} />
+                                            <Route path="/games" element={<GamesPage gameCategories={gameCategories} onGameSelect={handleGameSelect} />} />
+                                            <Route path="/deposit" element={<DepositPage />} />
+
+                                            <Route path="/activities" element={<ActivitiesListPage />} />
+                                            <Route path="/activities/:id" element={<ActivityDetailPage />} />
+
+                                            <Route path="/member" element={<MemberMain setMemberSubPage={(sub) => navigate(`/member/${sub === 'main' ? '' : sub}`)} />} />
+                                            <Route path="/member/profile" element={<MemberProfilePage setMemberSubPage={() => navigate('/member')} />} />
+                                            <Route path="/member/bets" element={<MemberBetsPage setMemberSubPage={() => navigate('/member')} />} />
+                                            <Route path="/member/transactions" element={<MemberTransactionsPage setMemberSubPage={() => navigate('/member')} />} />
+                                            <Route path="/member/promotions" element={<MemberPromotionsPage setMemberSubPage={() => navigate('/member')} />} />
+                                            <Route path="/member/vip" element={<MemberVipPage setMemberSubPage={() => navigate('/member')} />} />
+
+                                            <Route path="*" element={<Navigate to="/" replace />} />
+                                        </Routes>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
-                    </div>
+                            )}
+                        </div>
+                    )}
                 </>
             )}
 

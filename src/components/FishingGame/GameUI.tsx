@@ -45,9 +45,9 @@ export const GameUI: React.FC<GameUIProps> = ({
                 <div className="flex items-center gap-2 max-w-[60%]">
                     <button
                         onClick={onExit}
-                        className="bg-red-600 text-white px-3 py-1 rounded border border-red-400 font-bold hover:bg-red-700 active:scale-95 transition-all text-sm shadow-md"
+                        className="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg border-2 border-red-400 font-bold hover:from-red-700 hover:to-red-800 active:scale-95 transition-all text-sm shadow-lg hover:shadow-xl"
                     >
-                        退出
+                        ← 退出遊戲
                     </button>
                     {/* Activity Bar Removed */}
                 </div>
@@ -68,51 +68,51 @@ export const GameUI: React.FC<GameUIProps> = ({
             {/* Right UI Removed */}
 
             {/* Bottom UI */}
-            <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/90 to-transparent flex items-end justify-between px-4 pb-2 pointer-events-auto z-10">
+            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-black/90 via-black/70 to-transparent flex items-end justify-between px-6 pb-3 pointer-events-auto z-10">
 
                 {/* Coin Display */}
-                <div className="flex items-center bg-black/70 rounded-full pl-2 pr-6 py-1.5 border border-[#4a5568] min-w-[160px]">
-                    <span className="text-2xl mr-2 filter drop-shadow-[0_0_5px_#ffd700]">🪙</span>
-                    <span className="text-[#ffd700] font-mono text-xl font-bold tracking-wider">{Utils.format(balance)}</span>
+                <div className="flex items-center bg-black/70 rounded-full pl-3 pr-6 py-2 border-2 border-[#4a5568] min-w-[180px] shadow-lg">
+                    <span className="text-3xl mr-2 filter drop-shadow-[0_0_5px_#ffd700]">🪙</span>
+                    <span className="text-[#ffd700] font-mono text-2xl font-bold tracking-wider">{Utils.format(balance)}</span>
                 </div>
 
                 {/* Controls */}
-                <div className="absolute left-1/2 bottom-3 -translate-x-1/2 flex items-center gap-4">
+                <div className="absolute left-1/2 bottom-4 -translate-x-1/2 flex items-center gap-5">
                     <button
                         onClick={() => onChangeBet(-1)}
-                        className="w-10 h-10 rounded-full bg-[#1e293b] border border-[#475569] text-[#94a3b8] hover:text-white hover:border-white active:bg-[#334155] transition-all flex items-center justify-center font-bold text-xl"
+                        className="w-12 h-12 rounded-full bg-[#1e293b] border-2 border-[#475569] text-[#94a3b8] hover:text-white hover:border-white active:bg-[#334155] transition-all flex items-center justify-center font-bold text-2xl shadow-lg"
                     >
                         −
                     </button>
 
-                    <div className="bg-black/60 px-6 py-2 rounded-lg border border-[#ffd700] flex flex-col items-center min-w-[100px]">
-                        <span className="text-[#94a3b8] text-[10px] uppercase tracking-widest">倍率</span>
-                        <span className="text-[#ffd700] font-bold text-xl">{currentBet}</span>
+                    <div className="bg-black/70 px-8 py-3 rounded-lg border-2 border-[#ffd700] flex flex-col items-center min-w-[120px] shadow-lg">
+                        <span className="text-[#94a3b8] text-xs uppercase tracking-widest">倍率</span>
+                        <span className="text-[#ffd700] font-bold text-2xl">{currentBet}</span>
                     </div>
 
                     <button
                         onClick={() => onChangeBet(1)}
-                        className="w-10 h-10 rounded-full bg-[#1e293b] border border-[#475569] text-[#94a3b8] hover:text-white hover:border-white active:bg-[#334155] transition-all flex items-center justify-center font-bold text-xl"
+                        className="w-12 h-12 rounded-full bg-[#1e293b] border-2 border-[#475569] text-[#94a3b8] hover:text-white hover:border-white active:bg-[#334155] transition-all flex items-center justify-center font-bold text-2xl shadow-lg"
                     >
                         +
                     </button>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3">
+                <div className="flex gap-4">
                     <button
                         onClick={onToggleAutoFire}
-                        className={`flex flex-col items-center justify-center w-14 h-14 rounded-full border-2 transition-all ${isAutoFire ? 'bg-[#ef4444] border-[#fca5a5] shadow-[0_0_15px_#ef4444]' : 'bg-[#1e293b] border-[#475569] hover:bg-[#334155]'}`}
+                        className={`flex flex-col items-center justify-center w-16 h-16 rounded-full border-2 transition-all shadow-lg ${isAutoFire ? 'bg-[#ef4444] border-[#fca5a5] shadow-[0_0_20px_#ef4444]' : 'bg-[#1e293b] border-[#475569] hover:bg-[#334155]'}`}
                     >
-                        <span className={`text-2xl mb-[-4px] ${isAutoFire ? 'animate-spin' : ''}`}>🔄</span>
+                        <span className={`text-3xl mb-[-4px] ${isAutoFire ? 'animate-spin' : ''}`}>🔄</span>
                         <span className="text-[10px] font-bold text-white">自動</span>
                     </button>
 
                     <button
                         onClick={onToggleLock}
-                        className={`flex flex-col items-center justify-center w-14 h-14 rounded-full border-2 transition-all ${isLocked ? 'bg-[#3b82f6] border-[#93c5fd] shadow-[0_0_15px_#3b82f6]' : 'bg-[#1e293b] border-[#475569] hover:bg-[#334155]'}`}
+                        className={`flex flex-col items-center justify-center w-16 h-16 rounded-full border-2 transition-all shadow-lg ${isLocked ? 'bg-[#3b82f6] border-[#93c5fd] shadow-[0_0_20px_#3b82f6]' : 'bg-[#1e293b] border-[#475569] hover:bg-[#334155]'}`}
                     >
-                        <span className="text-2xl mb-[-4px]">🎯</span>
+                        <span className="text-3xl mb-[-4px]">🎯</span>
                         <span className="text-[10px] font-bold text-white">鎖定</span>
                     </button>
                 </div>
