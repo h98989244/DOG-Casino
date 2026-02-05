@@ -4,7 +4,7 @@ import { MessageCircle } from 'lucide-react';
 const LineButton: React.FC = () => {
     return (
         <a
-            href="https://line.me/ti/p/@525jjefs"
+            href="https://line.me/ti/p/@386qduvb"
             target="_blank"
             rel="noopener noreferrer"
             className="fixed bottom-24 right-4 bg-green-500 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform z-50 flex items-center justify-center"

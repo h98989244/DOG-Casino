@@ -58,7 +58,7 @@ const ActivitiesListPage: React.FC = () => {
                     </div>
                 </div>
                 <a
-                    href="https://line.me/ti/p/@your-line-id"
+                    href="https://line.me/ti/p/@386qduvb"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="block w-full bg-white text-green-600 py-2 rounded-xl font-bold hover:scale-105 transition-transform flex items-center justify-center"

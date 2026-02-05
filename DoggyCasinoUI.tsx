@@ -383,7 +383,7 @@ const DoggyCasinoUI = () => {
           <div className="mt-6 bg-white rounded-2xl p-4 shadow-md text-center">
             <p className="text-sm text-gray-600 mb-2">遇到問題？</p>
             <a
-              href="https://line.me/ti/p/@525jjefs"
+              href="https://line.me/ti/p/@386qduvb"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center space-x-2 text-green-500 font-bold hover:underline"
@@ -733,7 +733,7 @@ const DoggyCasinoUI = () => {
             </div>
           </div>
           <a
-            href="https://line.me/ti/p/@525jjefs"
+            href="https://line.me/ti/p/@386qduvb"
             target="_blank"
             rel="noopener noreferrer"
             className="block w-full bg-white text-green-600 py-2 rounded-xl font-bold hover:scale-105 transition-transform flex items-center justify-center"
@@ -1296,7 +1296,7 @@ const DoggyCasinoUI = () => {
   // LINE 客服按鈕
   const LineButton = () => (
     <a
-      href="https://line.me/ti/p/@525jjefs"
+      href="https://line.me/ti/p/@386qduvb"
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-24 right-4 bg-green-500 text-white p-4 rounded-full shadow-2xl hover:scale-110 transition-transform z-50 flex items-center justify-center"
@@ -1424,7 +1424,7 @@ const DoggyCasinoUI = () => {
                     </div>
                     <p className="text-sm mb-3 opacity-90">即時線上為您服務</p>
                     <a
-                      href="https://line.me/ti/p/@525jjefs"
+                      href="https://line.me/ti/p/@386qduvb"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="block w-full bg-white text-green-600 py-2 rounded-xl font-bold hover:scale-105 transition-transform text-center"
