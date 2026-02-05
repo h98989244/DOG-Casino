@@ -16,8 +16,8 @@ interface GamesPageProps {
 }
 
 const GamesPage: React.FC<GamesPageProps> = ({ gameCategories, onGameSelect }) => {
-    const navigate = useNavigate();
-    const registeredGames = getAllGames();
+    // const navigate = useNavigate();
+    // const registeredGames = getAllGames();
 
     return (
         <div className="space-y-4 pb-20">
