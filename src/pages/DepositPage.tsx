@@ -63,14 +63,19 @@ const DepositPage: React.FC = () => {
 
         const queryOrder = async () => {
             try {
-                const res = await fetch(`${GGCARD_API_URL}/api/payment/query`, {
+                // 取得 userId
+                const stored = localStorage.getItem('userProfile');
+                const userId = stored ? JSON.parse(stored).id : '';
+
+                // 呼叫 confirm-and-update：查詢 + 確認交易 + 更新 Supabase 一次完成
+                const res = await fetch(`${GGCARD_API_URL}/api/payment/confirm-and-update`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ authCode: pendingAuthCode }),
+                    body: JSON.stringify({ authCode: pendingAuthCode, userId }),
                 });
                 const data = await res.json();
 
-                if (data.data?.payResult === '3') {
+                if (data.success && data.data?.payResult === '3') {
                     const amount = data.data.amount || '0';
                     setMessage({
                         type: 'success',
@@ -81,13 +86,11 @@ const DepositPage: React.FC = () => {
                     addToLocalBalance(Number(amount));
                     setTimeout(() => window.location.reload(), 1500);
                 } else if (data.data?.returnCode === '006') {
-                    // 授權成功但尚未交易完成，等一下再查
                     setMessage({ type: 'error', text: '交易處理中，請稍候重新整理頁面確認結果' });
-                    // 不清除 localStorage，下次重整還能查
                 } else {
                     setMessage({
                         type: 'error',
-                        text: `儲值失敗：${data.data?.returnMsg || '未知錯誤'}，交易編號: ${pendingTradeSeq || '無'}`,
+                        text: `儲值失敗：${data.message || '未知錯誤'}，交易編號: ${pendingTradeSeq || '無'}`,
                     });
                     localStorage.removeItem('pending_authCode');
                     localStorage.removeItem('pending_tradeSeq');
