@@ -10,33 +10,88 @@ const DepositPage: React.FC = () => {
     const { profile, loading: profileLoading } = useUserProfile();
     const { currentLevelInfo, loading: vipLoading } = useUserVipInfo();
     const [submitting, setSubmitting] = useState(false);
+    const [checking, setChecking] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [searchParams, setSearchParams] = useSearchParams();
 
-    // 處理付款回調結果
+    // 從 GGCard 回來後，主動查詢訂單狀態
     useEffect(() => {
-        const result = searchParams.get('result');
-        const tradeSeq = searchParams.get('tradeSeq');
-        const amount = searchParams.get('amount');
+        const pendingAuthCode = localStorage.getItem('pending_authCode');
+        const pendingTradeSeq = localStorage.getItem('pending_tradeSeq');
 
-        if (result) {
-            if (result === '3') {
-                const amountText = amount ? ` NT$${Number(amount).toLocaleString()}` : '';
-                setMessage({ type: 'success', text: `儲值成功！${amountText}，交易編號: ${tradeSeq || ''}` });
-                setSearchParams({}, { replace: true });
-                setTimeout(() => window.location.reload(), 2000);
-                return;
-            } else {
-                const resultMap: Record<string, string> = {
-                    '0': '交易失敗',
-                    '1': '交易未完成',
-                    '2': '交易處理中',
-                };
-                const resultText = resultMap[result] || `未知狀態 (${result})`;
-                setMessage({ type: 'error', text: `儲值${resultText}，交易編號: ${tradeSeq || '無'}` });
+        // 有 URL 參數或有待查詢的 authCode 時處理
+        const result = searchParams.get('result');
+
+        if (!pendingAuthCode) {
+            // 沒有待查詢的訂單，檢查 URL 參數（來自 worker redirect）
+            if (result) {
+                if (result === '3') {
+                    const amount = searchParams.get('amount');
+                    const tradeSeq = searchParams.get('tradeSeq');
+                    const amountText = amount ? ` NT$${Number(amount).toLocaleString()}` : '';
+                    setMessage({ type: 'success', text: `儲值成功！${amountText}，交易編號: ${tradeSeq || ''}` });
+                    setSearchParams({}, { replace: true });
+                    setTimeout(() => window.location.reload(), 2000);
+                } else {
+                    const resultMap: Record<string, string> = {
+                        '0': '交易失敗',
+                        '1': '交易未完成',
+                        '2': '交易處理中',
+                    };
+                    const tradeSeq = searchParams.get('tradeSeq');
+                    const resultText = resultMap[result] || `未知狀態 (${result})`;
+                    setMessage({ type: 'error', text: `儲值${resultText}，交易編號: ${tradeSeq || '無'}` });
+                    setSearchParams({}, { replace: true });
+                }
             }
-            setSearchParams({}, { replace: true });
+            return;
         }
+
+        // 有待查詢的 authCode，主動查詢訂單狀態
+        setSearchParams({}, { replace: true });
+        setChecking(true);
+
+        const queryOrder = async () => {
+            try {
+                const res = await fetch(`${GGCARD_API_URL}/api/payment/query`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ authCode: pendingAuthCode }),
+                });
+                const data = await res.json();
+
+                if (data.data?.payResult === '3') {
+                    const amount = data.data.amount || '0';
+                    setMessage({
+                        type: 'success',
+                        text: `儲值成功！NT$${Number(amount).toLocaleString()}，交易編號: ${pendingTradeSeq || data.data.facTradeSeq || ''}`,
+                    });
+                    localStorage.removeItem('pending_authCode');
+                    localStorage.removeItem('pending_tradeSeq');
+                    setTimeout(() => window.location.reload(), 2000);
+                } else if (data.data?.returnCode === '006') {
+                    // 授權成功但尚未交易完成，等一下再查
+                    setMessage({ type: 'error', text: '交易處理中，請稍候重新整理頁面確認結果' });
+                    // 不清除 localStorage，下次重整還能查
+                } else {
+                    setMessage({
+                        type: 'error',
+                        text: `儲值失敗：${data.data?.returnMsg || '未知錯誤'}，交易編號: ${pendingTradeSeq || '無'}`,
+                    });
+                    localStorage.removeItem('pending_authCode');
+                    localStorage.removeItem('pending_tradeSeq');
+                }
+            } catch (err) {
+                console.error('查詢訂單失敗:', err);
+                setMessage({ type: 'error', text: '查詢訂單狀態失敗，請稍後重新整理頁面' });
+            } finally {
+                setChecking(false);
+            }
+        };
+
+        // 延遲 1 秒再查，讓 GGCard server callback 有時間處理
+        const timer = setTimeout(queryOrder, 1000);
+        return () => clearTimeout(timer);
     }, [searchParams, setSearchParams]);
 
     const handleDeposit = async () => {
@@ -65,6 +120,9 @@ const DepositPage: React.FC = () => {
             const data = await response.json();
 
             if (data.success && data.data?.transactionUrl) {
+                // 保存 authCode 供回來後查詢
+                localStorage.setItem('pending_authCode', data.data.authCode);
+                localStorage.setItem('pending_tradeSeq', data.data.facTradeSeq);
                 // 導向 GGCard 付款頁面
                 window.location.href = data.data.transactionUrl;
             } else {
@@ -94,6 +152,13 @@ const DepositPage: React.FC = () => {
                 </div>
             )}
 
+            {checking && (
+                <div className="p-4 rounded-xl flex items-center gap-2 bg-blue-100 text-blue-700">
+                    <Loader2 size={20} className="animate-spin" />
+                    正在查詢交易結果...
+                </div>
+            )}
+
             {/* 餘額卡片 */}
             <div className="bg-gradient-to-br from-yellow-400 to-orange-300 rounded-3xl p-6 shadow-lg text-white">
                 <div className="flex items-center justify-between mb-4">
@@ -112,8 +177,8 @@ const DepositPage: React.FC = () => {
             <div className="bg-white rounded-3xl p-5 shadow-md">
                 <button
                     onClick={handleDeposit}
-                    disabled={submitting}
-                    className={`w-full text-white py-4 rounded-2xl font-bold text-lg shadow-lg transition-transform flex items-center justify-center gap-3 ${submitting
+                    disabled={submitting || checking}
+                    className={`w-full text-white py-4 rounded-2xl font-bold text-lg shadow-lg transition-transform flex items-center justify-center gap-3 ${submitting || checking
                         ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:scale-105'
                         }`}
