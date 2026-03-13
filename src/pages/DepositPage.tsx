@@ -22,12 +22,17 @@ const DepositPage: React.FC = () => {
         if (result) {
             if (result === '3') {
                 setMessage({ type: 'success', text: `儲值成功！交易編號: ${tradeSeq || ''}` });
-                // 清除 URL 參數後重新載入頁面，讓 LIFF 重新登入取得最新餘額
                 setSearchParams({}, { replace: true });
                 setTimeout(() => window.location.reload(), 2000);
                 return;
             } else {
-                setMessage({ type: 'error', text: '儲值失敗，請稍後再試或聯繫客服' });
+                const resultMap: Record<string, string> = {
+                    '0': '交易失敗',
+                    '1': '交易未完成',
+                    '2': '交易處理中',
+                };
+                const resultText = resultMap[result] || `未知狀態 (${result})`;
+                setMessage({ type: 'error', text: `儲值${resultText}，交易編號: ${tradeSeq || '無'}` });
             }
             setSearchParams({}, { replace: true });
         }
