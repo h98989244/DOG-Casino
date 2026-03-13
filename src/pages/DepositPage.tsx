@@ -9,7 +9,6 @@ const GGCARD_API_URL = import.meta.env.VITE_GGCARD_API_URL || 'https://ggcard-pa
 const DepositPage: React.FC = () => {
     const { profile, loading: profileLoading } = useUserProfile();
     const { currentLevelInfo, loading: vipLoading } = useUserVipInfo();
-    const [selectedAmount, setSelectedAmount] = useState<string>('');
     const [submitting, setSubmitting] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [searchParams, setSearchParams] = useSearchParams();
@@ -44,11 +43,6 @@ const DepositPage: React.FC = () => {
             return;
         }
 
-        if (!selectedAmount) {
-            setMessage({ type: 'error', text: '請選擇儲值金額' });
-            return;
-        }
-
         try {
             setSubmitting(true);
             setMessage(null);
@@ -57,10 +51,11 @@ const DepositPage: React.FC = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    amount: Number(selectedAmount),
+                    amount: 1,
                     productName: '汪汪娛樂城儲值',
                     customerId: profile.id,
                     paymentType: '',
+                    customAmount: true,
                     clientBackURL: `${window.location.origin}/deposit`,
                 }),
             });
@@ -111,41 +106,27 @@ const DepositPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* 儲值選項 */}
+            {/* 快速儲值 */}
             <div className="bg-white rounded-3xl p-5 shadow-md">
-                <h3 className="font-bold text-gray-800 mb-4 flex items-center">
-                    <CreditCard size={20} className="mr-2" />
-                    快速儲值
-                </h3>
-                <div className="grid grid-cols-3 gap-3 mb-4">
-                    {['1000', '3000', '5000', '10000', '30000', '50000'].map(amount => (
-                        <button
-                            key={amount}
-                            onClick={() => setSelectedAmount(amount)}
-                            disabled={submitting}
-                            className={`border-2 rounded-2xl py-3 font-bold transition-all hover:scale-105 ${selectedAmount === amount
-                                ? 'bg-blue-100 border-blue-500 text-blue-700'
-                                : 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-600'
-                                } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                            ${amount}
-                        </button>
-                    ))}
-                </div>
                 <button
                     onClick={handleDeposit}
-                    disabled={submitting || !selectedAmount}
-                    className={`w-full text-white py-3 rounded-2xl font-bold shadow-lg transition-transform flex items-center justify-center gap-2 ${submitting || !selectedAmount
+                    disabled={submitting}
+                    className={`w-full text-white py-4 rounded-2xl font-bold text-lg shadow-lg transition-transform flex items-center justify-center gap-3 ${submitting
                         ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-blue-500 hover:scale-105'
+                        : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:scale-105'
                         }`}
                 >
                     {submitting ? (
                         <>
-                            <Loader2 size={20} className="animate-spin" />
+                            <Loader2 size={22} className="animate-spin" />
                             導向付款頁面中...
                         </>
-                    ) : '確認儲值'}
+                    ) : (
+                        <>
+                            <CreditCard size={22} />
+                            快速儲值
+                        </>
+                    )}
                 </button>
             </div>
         </div>
