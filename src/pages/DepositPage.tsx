@@ -14,6 +14,15 @@ const DepositPage: React.FC = () => {
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [searchParams, setSearchParams] = useSearchParams();
 
+    // 用儲值金額更新 localStorage 裡的餘額
+    const addToLocalBalance = (depositAmount: number) => {
+        const stored = localStorage.getItem('userProfile');
+        if (!stored) return;
+        const user = JSON.parse(stored);
+        user.balance = (user.balance || 0) + depositAmount;
+        localStorage.setItem('userProfile', JSON.stringify(user));
+    };
+
     // 從 GGCard 回來後，主動查詢訂單狀態
     useEffect(() => {
         const pendingAuthCode = localStorage.getItem('pending_authCode');
@@ -31,7 +40,8 @@ const DepositPage: React.FC = () => {
                     const amountText = amount ? ` NT$${Number(amount).toLocaleString()}` : '';
                     setMessage({ type: 'success', text: `儲值成功！${amountText}，交易編號: ${tradeSeq || ''}` });
                     setSearchParams({}, { replace: true });
-                    setTimeout(() => window.location.reload(), 2000);
+                    if (amount) addToLocalBalance(Number(amount));
+                    setTimeout(() => window.location.reload(), 1500);
                 } else {
                     const resultMap: Record<string, string> = {
                         '0': '交易失敗',
@@ -68,7 +78,8 @@ const DepositPage: React.FC = () => {
                     });
                     localStorage.removeItem('pending_authCode');
                     localStorage.removeItem('pending_tradeSeq');
-                    setTimeout(() => window.location.reload(), 2000);
+                    addToLocalBalance(Number(amount));
+                    setTimeout(() => window.location.reload(), 1500);
                 } else if (data.data?.returnCode === '006') {
                     // 授權成功但尚未交易完成，等一下再查
                     setMessage({ type: 'error', text: '交易處理中，請稍候重新整理頁面確認結果' });
