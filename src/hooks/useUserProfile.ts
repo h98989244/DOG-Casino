@@ -20,23 +20,8 @@ export const useUserProfile = () => {
                 return
             }
 
-            const localProfile = JSON.parse(storedProfile)
-
-            // 從 Supabase 取得最新資料（確保餘額等即時更新）
-            const { data, error: fetchError } = await supabase
-                .from('user_profiles')
-                .select('*')
-                .eq('id', localProfile.id)
-                .single()
-
-            if (fetchError || !data) {
-                // 若 Supabase 查詢失敗，退回 localStorage 資料
-                setProfile(localProfile)
-            } else {
-                setProfile(data)
-                localStorage.setItem('userProfile', JSON.stringify(data))
-            }
-
+            const userProfile = JSON.parse(storedProfile)
+            setProfile(userProfile)
             setError(null)
         } catch (err: any) {
             console.error('Profile fetch error:', err)

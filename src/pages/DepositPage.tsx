@@ -7,7 +7,7 @@ import { useSearchParams } from 'react-router-dom';
 const GGCARD_API_URL = import.meta.env.VITE_GGCARD_API_URL || 'https://ggcard-payment-api.log.tw';
 
 const DepositPage: React.FC = () => {
-    const { profile, loading: profileLoading, refetch } = useUserProfile();
+    const { profile, loading: profileLoading } = useUserProfile();
     const { currentLevelInfo, loading: vipLoading } = useUserVipInfo();
     const [selectedAmount, setSelectedAmount] = useState<string>('');
     const [submitting, setSubmitting] = useState(false);
@@ -22,15 +22,16 @@ const DepositPage: React.FC = () => {
         if (result) {
             if (result === '3') {
                 setMessage({ type: 'success', text: `儲值成功！交易編號: ${tradeSeq || ''}` });
-                // 重新載入使用者資料以更新餘額
-                refetch?.();
+                // 清除 URL 參數後重新載入頁面，讓 LIFF 重新登入取得最新餘額
+                setSearchParams({}, { replace: true });
+                setTimeout(() => window.location.reload(), 2000);
+                return;
             } else {
                 setMessage({ type: 'error', text: '儲值失敗，請稍後再試或聯繫客服' });
             }
-            // 清除 URL 參數
             setSearchParams({}, { replace: true });
         }
-    }, [searchParams, setSearchParams, refetch]);
+    }, [searchParams, setSearchParams]);
 
     const handleDeposit = async () => {
         if (!profile) {
