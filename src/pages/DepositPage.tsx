@@ -1,20 +1,38 @@
-import React, { useState } from 'react';
-import { CreditCard } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import React, { useState, useEffect } from 'react';
+import { CreditCard, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { useUserVipInfo } from '../hooks/useUserVipInfo';
+import { useSearchParams } from 'react-router-dom';
+
+const GGCARD_API_URL = import.meta.env.VITE_GGCARD_API_URL || 'https://ggcard-payment-api.log.tw';
 
 const DepositPage: React.FC = () => {
-    // 移除 useAuth，改用 useUserProfile 判斷登入狀態
-    // const { user } = useAuth();
-    const { profile, loading: profileLoading } = useUserProfile();
+    const { profile, loading: profileLoading, refetch } = useUserProfile();
     const { currentLevelInfo, loading: vipLoading } = useUserVipInfo();
     const [selectedAmount, setSelectedAmount] = useState<string>('');
     const [submitting, setSubmitting] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    // 處理付款回調結果
+    useEffect(() => {
+        const result = searchParams.get('result');
+        const tradeSeq = searchParams.get('tradeSeq');
+
+        if (result) {
+            if (result === '3') {
+                setMessage({ type: 'success', text: `儲值成功！交易編號: ${tradeSeq || ''}` });
+                // 重新載入使用者資料以更新餘額
+                refetch?.();
+            } else {
+                setMessage({ type: 'error', text: '儲值失敗，請稍後再試或聯繫客服' });
+            }
+            // 清除 URL 參數
+            setSearchParams({}, { replace: true });
+        }
+    }, [searchParams, setSearchParams, refetch]);
 
     const handleDeposit = async () => {
-        // 使用 profile 判斷是否登入
         if (!profile) {
             setMessage({ type: 'error', text: '請先登入' });
             return;
@@ -29,57 +47,29 @@ const DepositPage: React.FC = () => {
             setSubmitting(true);
             setMessage(null);
 
-            // 檢測登入方式並取得對應的驗證 token
-            const idToken = window.liff?.getIDToken();
-            let requestBody: any = {
-                amount: Number(selectedAmount),
-                paymentMethod: 'quick_pay'
-            };
+            const response = await fetch(`${GGCARD_API_URL}/api/payment/create-order`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: Number(selectedAmount),
+                    productName: '汪汪娛樂城儲值',
+                    customerId: profile.id,
+                    paymentType: '',
+                    clientBackURL: `${window.location.origin}/deposit`,
+                }),
+            });
 
-            if (idToken) {
-                // LINE 登入:使用 LINE ID Token
-                requestBody.idToken = idToken;
+            const data = await response.json();
+
+            if (data.success && data.data?.transactionUrl) {
+                // 導向 GGCard 付款頁面
+                window.location.href = data.data.transactionUrl;
             } else {
-                // EMAIL 登入:使用 Supabase Access Token
-                const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-                if (sessionError || !sessionData.session?.access_token) {
-                    throw new Error('無法取得驗證資訊,請重新登入');
-                }
-                requestBody.accessToken = sessionData.session.access_token;
+                throw new Error(data.error?.message || data.message || '建立訂單失敗');
             }
-
-            // 改用 Edge Function 建立交易,繞過 RLS 問題並進行伺服器端驗證
-            const { data, error } = await supabase.functions.invoke('create-deposit', {
-                body: requestBody
-            });
-
-            if (error) {
-                console.error('Edge Function Error:', error);
-                throw new Error(error.message || '連線失敗');
-            }
-
-            if (!data.success) {
-                throw new Error(data.error || '儲值申請失敗');
-            }
-
-            // 直接寫入 DB 的舊代碼 (已註解)
-            /*
-            const { error } = await supabase.from('transactions').insert({
-                user_id: user.id,
-                type: 'deposit',
-                amount: Number(selectedAmount),
-                status: 'pending', // 或是 completed，視業務邏輯而定，這裡先設為 pending
-                payment_method: 'quick_pay',
-                description: `快速儲值 ${selectedAmount}`
-            });
-            */
-
-            setMessage({ type: 'success', text: '儲值申請已提交，請稍候' });
-            setSelectedAmount('');
         } catch (err: any) {
             console.error('儲值失敗:', err);
             setMessage({ type: 'error', text: err.message || '儲值失敗，請稍後再試' });
-        } finally {
             setSubmitting(false);
         }
     };
@@ -95,7 +85,8 @@ const DepositPage: React.FC = () => {
 
             {/* 訊息提示 */}
             {message && (
-                <div className={`p-4 rounded-xl ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                <div className={`p-4 rounded-xl flex items-center gap-2 ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    {message.type === 'success' ? <CheckCircle size={20} /> : <XCircle size={20} />}
                     {message.text}
                 </div>
             )}
@@ -125,10 +116,11 @@ const DepositPage: React.FC = () => {
                         <button
                             key={amount}
                             onClick={() => setSelectedAmount(amount)}
+                            disabled={submitting}
                             className={`border-2 rounded-2xl py-3 font-bold transition-all hover:scale-105 ${selectedAmount === amount
                                 ? 'bg-blue-100 border-blue-500 text-blue-700'
                                 : 'bg-blue-50 hover:bg-blue-100 border-blue-200 text-blue-600'
-                                }`}
+                                } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                             ${amount}
                         </button>
@@ -137,12 +129,17 @@ const DepositPage: React.FC = () => {
                 <button
                     onClick={handleDeposit}
                     disabled={submitting || !selectedAmount}
-                    className={`w-full text-white py-3 rounded-2xl font-bold shadow-lg transition-transform ${submitting || !selectedAmount
+                    className={`w-full text-white py-3 rounded-2xl font-bold shadow-lg transition-transform flex items-center justify-center gap-2 ${submitting || !selectedAmount
                         ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-blue-500 hover:scale-105'
                         }`}
                 >
-                    {submitting ? '處理中...' : '確認儲值'}
+                    {submitting ? (
+                        <>
+                            <Loader2 size={20} className="animate-spin" />
+                            導向付款頁面中...
+                        </>
+                    ) : '確認儲值'}
                 </button>
             </div>
         </div>
@@ -150,4 +147,3 @@ const DepositPage: React.FC = () => {
 };
 
 export default DepositPage;
-

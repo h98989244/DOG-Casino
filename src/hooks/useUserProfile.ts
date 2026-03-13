@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase, UserProfile } from '../lib/supabase'
 
 export const useUserProfile = () => {
@@ -6,35 +6,50 @@ export const useUserProfile = () => {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                setLoading(true)
+    const fetchProfile = useCallback(async () => {
+        try {
+            setLoading(true)
 
-                // 從 localStorage 讀取使用者資料
-                const storedProfile = localStorage.getItem('userProfile')
+            // 從 localStorage 讀取使用者資料
+            const storedProfile = localStorage.getItem('userProfile')
 
-                if (!storedProfile) {
-                    setProfile(null)
-                    setError('請先登入')
-                    setLoading(false)
-                    return
-                }
-
-                const userProfile = JSON.parse(storedProfile)
-                setProfile(userProfile)
-                setError(null)
-            } catch (err: any) {
-                console.error('Profile fetch error:', err)
-                setError(err.message || '獲取會員資料失敗')
+            if (!storedProfile) {
                 setProfile(null)
-            } finally {
+                setError('請先登入')
                 setLoading(false)
+                return
             }
-        }
 
-        fetchProfile()
+            const localProfile = JSON.parse(storedProfile)
+
+            // 從 Supabase 取得最新資料（確保餘額等即時更新）
+            const { data, error: fetchError } = await supabase
+                .from('user_profiles')
+                .select('*')
+                .eq('id', localProfile.id)
+                .single()
+
+            if (fetchError || !data) {
+                // 若 Supabase 查詢失敗，退回 localStorage 資料
+                setProfile(localProfile)
+            } else {
+                setProfile(data)
+                localStorage.setItem('userProfile', JSON.stringify(data))
+            }
+
+            setError(null)
+        } catch (err: any) {
+            console.error('Profile fetch error:', err)
+            setError(err.message || '獲取會員資料失敗')
+            setProfile(null)
+        } finally {
+            setLoading(false)
+        }
     }, [])
+
+    useEffect(() => {
+        fetchProfile()
+    }, [fetchProfile])
 
     const updateProfile = async (updates: Partial<UserProfile>) => {
         if (!profile) {
@@ -62,5 +77,5 @@ export const useUserProfile = () => {
         }
     }
 
-    return { profile, loading, error, updateProfile }
+    return { profile, loading, error, updateProfile, refetch: fetchProfile }
 }
