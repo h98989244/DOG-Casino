@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"/c/Users/user/Desktop/汪汪娛樂城\" log --oneline -15)",
+      "Bash(git remote:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
