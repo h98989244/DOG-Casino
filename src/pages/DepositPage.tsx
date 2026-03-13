@@ -17,10 +17,12 @@ const DepositPage: React.FC = () => {
     useEffect(() => {
         const result = searchParams.get('result');
         const tradeSeq = searchParams.get('tradeSeq');
+        const amount = searchParams.get('amount');
 
         if (result) {
             if (result === '3') {
-                setMessage({ type: 'success', text: `儲值成功！交易編號: ${tradeSeq || ''}` });
+                const amountText = amount ? ` NT$${Number(amount).toLocaleString()}` : '';
+                setMessage({ type: 'success', text: `儲值成功！${amountText}，交易編號: ${tradeSeq || ''}` });
                 setSearchParams({}, { replace: true });
                 setTimeout(() => window.location.reload(), 2000);
                 return;
