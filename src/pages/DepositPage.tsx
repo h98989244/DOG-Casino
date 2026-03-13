@@ -54,7 +54,7 @@ const DepositPage: React.FC = () => {
                     amount: 1,
                     productName: '汪汪娛樂城儲值',
                     customerId: profile.id,
-                    paymentType: '',
+                    paymentType: 'TestSNo',
                     customAmount: true,
                     clientBackURL: `${window.location.origin}/deposit`,
                 }),
