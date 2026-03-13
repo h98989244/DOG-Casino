@@ -6,8 +6,8 @@ applications:
       phases:
         preBuild:
           commands:
-            # - corepack enable # <--- 啟用 Corepack
-            # - corepack prepare pnpm@latest --activate # <--- 準備 pnpm
+            - corepack enable
+            - corepack prepare pnpm@latest --activate
             - pnpm config set store-dir .pnpm-store # <--- 設定 pnpm store 目錄
             - pnpm install
         build:
