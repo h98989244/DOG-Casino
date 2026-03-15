@@ -279,7 +279,7 @@ const DepositPage: React.FC = () => {
                     ) : (
                         <>
                             <CreditCard size={22} />
-                            {amount ? `信用卡儲值 NT$ ${Number(amount).toLocaleString()}` : '請選擇金額'}
+                            {amount ? `儲值 NT$ ${Number(amount).toLocaleString()}` : '請選擇金額'}
                         </>
                     )}
                 </button>
