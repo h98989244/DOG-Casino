@@ -3,7 +3,7 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const GGCARD_API_URL = Deno.env.get('GGCARD_API_URL') || 'https://ggcard-payment-api.log.tw'
+const BILLING_API_URL = 'https://main.d9vdatuqb73jv.amplifyapp.com/api/billing'
 
 Deno.serve(async (req) => {
     if (req.method === 'OPTIONS') {
@@ -13,28 +13,105 @@ Deno.serve(async (req) => {
     try {
         const { endpoint, ...body } = await req.json()
 
-        // 只允許特定的 endpoint
-        const allowedEndpoints = [
-            '/api/payment/create-order',
-            '/api/payment/confirm-and-update',
-        ]
+        // 將舊的 endpoint 對應到新的 billing API
+        const endpointMap: Record<string, string> = {
+            '/api/payment/create-order': '/auth',
+            '/api/payment/confirm-and-update': '/query',
+        }
 
-        if (!endpoint || !allowedEndpoints.includes(endpoint)) {
+        const mappedPath = endpointMap[endpoint]
+        if (!mappedPath) {
             throw new Error(`Invalid endpoint: ${endpoint}`)
         }
 
-        const response = await fetch(`${GGCARD_API_URL}${endpoint}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-        })
+        // create-order: 轉換參數格式
+        if (endpoint === '/api/payment/create-order') {
+            const billingBody = {
+                FacTradeSeq: 'ORDER-' + Date.now(),
+                FacGameId: 'game1',
+                FacGameName: '汪汪娛樂城',
+                TradeType: '2',
+                CustomerId: body.customerId || 'user',
+                PaymentType: body.paymentType || 'TestSNo',
+                ProductName: body.productName || '汪汪娛樂城儲值',
+                Amount: String(body.amount || '100'),
+                Currency: 'TWD',
+                SandBoxMode: 'true',
+            }
 
-        const data = await response.json()
+            const response = await fetch(`${BILLING_API_URL}${mappedPath}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(billingBody),
+            })
+            const data = await response.json()
 
-        return new Response(JSON.stringify(data), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: response.status,
-        })
+            // 將新 API 回應轉換成前端期望的格式
+            if (data.ReturnCode === '1') {
+                return new Response(JSON.stringify({
+                    success: true,
+                    data: {
+                        transactionUrl: data.TransactionUrl,
+                        authCode: data.AuthCode || '',
+                        facTradeSeq: billingBody.FacTradeSeq,
+                    },
+                }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                })
+            } else {
+                return new Response(JSON.stringify({
+                    success: false,
+                    message: data.Message || '建立訂單失敗',
+                }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                })
+            }
+        }
+
+        // confirm-and-update: 查詢訂單狀態
+        if (endpoint === '/api/payment/confirm-and-update') {
+            const queryBody = {
+                AuthCode: body.authCode,
+            }
+
+            const response = await fetch(`${BILLING_API_URL}${mappedPath}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(queryBody),
+            })
+            const data = await response.json()
+
+            // 將新 API 回應轉換成前端期望的格式
+            if (data.ReturnCode === '1' && data.PayResult === '3') {
+                return new Response(JSON.stringify({
+                    success: true,
+                    data: {
+                        payResult: '3',
+                        amount: data.Amount || '0',
+                        facTradeSeq: data.FacTradeSeq || '',
+                    },
+                }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                })
+            } else if (data.ReturnCode === '006') {
+                return new Response(JSON.stringify({
+                    success: false,
+                    data: { returnCode: '006' },
+                    message: '交易處理中',
+                }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                })
+            } else {
+                return new Response(JSON.stringify({
+                    success: false,
+                    message: data.Message || '查詢失敗',
+                }), {
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+                })
+            }
+        }
+
+        throw new Error(`Unhandled endpoint: ${endpoint}`)
     } catch (error) {
         console.error('Payment proxy error:', error)
         return new Response(

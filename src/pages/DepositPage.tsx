@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { CreditCard, CheckCircle, XCircle, Loader2, Landmark, Ticket } from 'lucide-react';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { useUserVipInfo } from '../hooks/useUserVipInfo';
 import { useSearchParams } from 'react-router-dom';
+
+type PaymentMethod = 'CreditCard' | 'ATM' | 'TestSNo';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -15,6 +17,7 @@ const DepositPage: React.FC = () => {
     const [checking, setChecking] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [searchParams, setSearchParams] = useSearchParams();
+    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CreditCard');
 
     // 用儲值金額更新 localStorage 裡的餘額
     const addToLocalBalance = (depositAmount: number) => {
@@ -107,7 +110,9 @@ const DepositPage: React.FC = () => {
                 }
             } catch (err) {
                 console.error('查詢訂單失敗:', err);
-                setMessage({ type: 'error', text: '查詢訂單狀態失敗，請稍後重新整理頁面' });
+                // 查詢失敗時靜默清除，不顯示錯誤給使用者
+                localStorage.removeItem('pending_authCode');
+                localStorage.removeItem('pending_tradeSeq');
             } finally {
                 setChecking(false);
             }
@@ -140,7 +145,7 @@ const DepositPage: React.FC = () => {
                     amount: 1,
                     productName: '汪汪娛樂城儲值',
                     customerId: profile.id,
-                    paymentType: 'TestSNo',
+                    paymentType: paymentMethod,
                     customAmount: true,
                     clientBackURL: `${window.location.origin}/deposit`,
                 }),
@@ -202,8 +207,46 @@ const DepositPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* 快速儲值 */}
-            <div className="bg-white rounded-3xl p-5 shadow-md">
+            {/* 付款方式選擇 */}
+            <div className="bg-white rounded-3xl p-5 shadow-md space-y-4">
+                <h2 className="text-lg font-bold text-gray-700">選擇付款方式</h2>
+                <div className="grid grid-cols-2 gap-3">
+                    <button
+                        onClick={() => setPaymentMethod('CreditCard')}
+                        className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${paymentMethod === 'CreditCard'
+                            ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md'
+                            : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                            }`}
+                    >
+                        <CreditCard size={24} />
+                        <span className="text-sm font-semibold">信用卡</span>
+                    </button>
+                    <button
+                        onClick={() => setPaymentMethod('ATM')}
+                        className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${paymentMethod === 'ATM'
+                            ? 'border-green-500 bg-green-50 text-green-700 shadow-md'
+                            : 'border-gray-200 text-gray-500 hover:border-gray-300'
+                            }`}
+                    >
+                        <Landmark size={24} />
+                        <span className="text-sm font-semibold">ATM 轉帳</span>
+                    </button>
+                </div>
+
+                {/* 測試用點數卡（小字） */}
+                <button
+                    onClick={() => setPaymentMethod('TestSNo')}
+                    className={`w-full p-2 rounded-xl border text-xs transition-all ${paymentMethod === 'TestSNo'
+                        ? 'border-orange-400 bg-orange-50 text-orange-600'
+                        : 'border-dashed border-gray-300 text-gray-400 hover:text-gray-500'
+                        }`}
+                >
+                    <div className="flex items-center justify-center gap-1">
+                        <Ticket size={14} />
+                        測試用點數卡
+                    </div>
+                </button>
+
                 <button
                     onClick={handleDeposit}
                     disabled={submitting || checking}
@@ -220,7 +263,7 @@ const DepositPage: React.FC = () => {
                     ) : (
                         <>
                             <CreditCard size={22} />
-                            快速儲值
+                            前往儲值
                         </>
                     )}
                 </button>
