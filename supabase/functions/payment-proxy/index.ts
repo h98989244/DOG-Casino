@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
                 FacGameName: '汪汪娛樂城',
                 TradeType: '2',
                 CustomerId: body.customerId || 'user',
-                PaymentType: body.paymentType || 'TestSNo',
+                PaymentType: body.paymentType === 'ATM' ? 'ATMSNo' : body.paymentType === 'CreditCard' ? 'CreditSNo' : (body.paymentType || 'CreditSNo'),
                 ProductName: body.productName || '汪汪娛樂城儲值',
                 Amount: String(body.amount || '100'),
                 Currency: 'TWD',
