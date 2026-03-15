@@ -4,7 +4,9 @@ import { useUserProfile } from '../hooks/useUserProfile';
 import { useUserVipInfo } from '../hooks/useUserVipInfo';
 import { useSearchParams } from 'react-router-dom';
 
-const GGCARD_API_URL = import.meta.env.VITE_GGCARD_API_URL || 'https://ggcard-payment-api.log.tw';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const PAYMENT_PROXY_URL = `${SUPABASE_URL}/functions/v1/payment-proxy`;
 
 const DepositPage: React.FC = () => {
     const { profile, loading: profileLoading } = useUserProfile();
@@ -68,10 +70,18 @@ const DepositPage: React.FC = () => {
                 const userId = stored ? JSON.parse(stored).id : '';
 
                 // 呼叫 confirm-and-update：查詢 + 確認交易 + 更新 Supabase 一次完成
-                const res = await fetch(`${GGCARD_API_URL}/api/payment/confirm-and-update`, {
+                const res = await fetch(PAYMENT_PROXY_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ authCode: pendingAuthCode, userId }),
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    },
+                    body: JSON.stringify({
+                        endpoint: '/api/payment/confirm-and-update',
+                        authCode: pendingAuthCode,
+                        userId,
+                    }),
                 });
                 const data = await res.json();
 
@@ -118,10 +128,15 @@ const DepositPage: React.FC = () => {
             setSubmitting(true);
             setMessage(null);
 
-            const response = await fetch(`${GGCARD_API_URL}/api/payment/create-order`, {
+            const response = await fetch(PAYMENT_PROXY_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'apikey': SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                },
                 body: JSON.stringify({
+                    endpoint: '/api/payment/create-order',
                     amount: 1,
                     productName: '汪汪娛樂城儲值',
                     customerId: profile.id,
