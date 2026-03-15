@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, CheckCircle, XCircle, Loader2, Landmark, Ticket } from 'lucide-react';
+import { CreditCard, CheckCircle, XCircle, Loader2, Landmark } from 'lucide-react';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { useUserVipInfo } from '../hooks/useUserVipInfo';
 import { useSearchParams } from 'react-router-dom';
 
-type PaymentMethod = 'CreditCard' | 'ATM' | 'TestSNo';
+type PaymentMethod = 'CreditCard' | 'ATM';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -232,20 +232,6 @@ const DepositPage: React.FC = () => {
                         <span className="text-sm font-semibold">ATM 轉帳</span>
                     </button>
                 </div>
-
-                {/* 測試用點數卡（小字） */}
-                <button
-                    onClick={() => setPaymentMethod('TestSNo')}
-                    className={`w-full p-2 rounded-xl border text-xs transition-all ${paymentMethod === 'TestSNo'
-                        ? 'border-orange-400 bg-orange-50 text-orange-600'
-                        : 'border-dashed border-gray-300 text-gray-400 hover:text-gray-500'
-                        }`}
-                >
-                    <div className="flex items-center justify-center gap-1">
-                        <Ticket size={14} />
-                        測試用點數卡
-                    </div>
-                </button>
 
                 <button
                     onClick={handleDeposit}

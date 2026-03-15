@@ -39,12 +39,20 @@ Deno.serve(async (req) => {
                 SandBoxMode: 'true',
             }
 
+            console.log('Billing API request:', JSON.stringify(billingBody))
             const response = await fetch(`${BILLING_API_URL}${mappedPath}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(billingBody),
             })
-            const data = await response.json()
+            const rawText = await response.text()
+            console.log('Billing API response:', rawText)
+            let data: any
+            try {
+                data = JSON.parse(rawText)
+            } catch {
+                throw new Error(`Billing API 回傳非 JSON: ${rawText.substring(0, 200)}`)
+            }
 
             // 將新 API 回應轉換成前端期望的格式
             if (data.ReturnCode === '1') {
@@ -61,7 +69,7 @@ Deno.serve(async (req) => {
             } else {
                 return new Response(JSON.stringify({
                     success: false,
-                    message: data.Message || '建立訂單失敗',
+                    message: data.Message || data.ReturnMsg || `建立訂單失敗 (ReturnCode: ${data.ReturnCode})`,
                 }), {
                     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
                 })
