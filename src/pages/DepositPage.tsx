@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { CreditCard, CheckCircle, XCircle, Loader2, Landmark } from 'lucide-react';
+import { CreditCard, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { useUserProfile } from '../hooks/useUserProfile';
 import { useUserVipInfo } from '../hooks/useUserVipInfo';
 import { useSearchParams } from 'react-router-dom';
 
-type PaymentMethod = 'CreditCard' | 'ATM';
-
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const PAYMENT_PROXY_URL = `${SUPABASE_URL}/functions/v1/payment-proxy`;
+
+const AMOUNT_OPTIONS = [100, 300, 500, 1000, 3000, 5000];
 
 const DepositPage: React.FC = () => {
     const { profile, loading: profileLoading } = useUserProfile();
@@ -17,7 +17,8 @@ const DepositPage: React.FC = () => {
     const [checking, setChecking] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [searchParams, setSearchParams] = useSearchParams();
-    const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CreditCard');
+    const [amount, setAmount] = useState('');
+    const [customAmount, setCustomAmount] = useState(false);
 
     // 用儲值金額更新 localStorage 裡的餘額
     const addToLocalBalance = (depositAmount: number) => {
@@ -48,12 +49,12 @@ const DepositPage: React.FC = () => {
             // 沒有待查詢的訂單，檢查 URL 參數（來自 worker redirect）
             if (result) {
                 if (result === '3') {
-                    const amount = searchParams.get('amount');
+                    const amt = searchParams.get('amount');
                     const tradeSeq = searchParams.get('tradeSeq');
-                    const amountText = amount ? ` NT$${Number(amount).toLocaleString()}` : '';
+                    const amountText = amt ? ` NT$${Number(amt).toLocaleString()}` : '';
                     setMessage({ type: 'success', text: `儲值成功！${amountText}，交易編號: ${tradeSeq || ''}` });
                     setSearchParams({}, { replace: true });
-                    if (amount) addToLocalBalance(Number(amount));
+                    if (amt) addToLocalBalance(Number(amt));
                     setTimeout(() => window.location.reload(), 1500);
                 } else {
                     const resultMap: Record<string, string> = {
@@ -76,11 +77,9 @@ const DepositPage: React.FC = () => {
 
         const queryOrder = async () => {
             try {
-                // 取得 userId
                 const stored = localStorage.getItem('userProfile');
                 const userId = stored ? JSON.parse(stored).id : '';
 
-                // 呼叫 confirm-and-update：查詢 + 確認交易 + 更新 Supabase 一次完成
                 const res = await fetch(PAYMENT_PROXY_URL, {
                     method: 'POST',
                     headers: {
@@ -97,15 +96,15 @@ const DepositPage: React.FC = () => {
                 const data = await res.json();
 
                 if (data.success && data.data?.payResult === '3') {
-                    const amount = data.data.amount || '0';
+                    const amt = data.data.amount || '0';
                     setMessage({
                         type: 'success',
-                        text: `儲值成功！NT$${Number(amount).toLocaleString()}，交易編號: ${pendingTradeSeq || data.data.facTradeSeq || ''}`,
+                        text: `儲值成功！NT$${Number(amt).toLocaleString()}，交易編號: ${pendingTradeSeq || data.data.facTradeSeq || ''}`,
                     });
                     localStorage.removeItem('pending_authCode');
                     localStorage.removeItem('pending_tradeSeq');
                     localStorage.removeItem('pending_time');
-                    addToLocalBalance(Number(amount));
+                    addToLocalBalance(Number(amt));
                     setTimeout(() => window.location.reload(), 1500);
                 } else if (data.data?.returnCode === '006') {
                     setMessage({ type: 'error', text: '交易處理中，請稍候重新整理頁面確認結果' });
@@ -120,15 +119,14 @@ const DepositPage: React.FC = () => {
                 }
             } catch (err) {
                 console.error('查詢訂單失敗:', err);
-                // 查詢失敗時靜默清除，不顯示錯誤給使用者
                 localStorage.removeItem('pending_authCode');
                 localStorage.removeItem('pending_tradeSeq');
+                localStorage.removeItem('pending_time');
             } finally {
                 setChecking(false);
             }
         };
 
-        // 延遲 1 秒再查，讓 GGCard server callback 有時間處理
         const timer = setTimeout(queryOrder, 1000);
         return () => clearTimeout(timer);
     }, [searchParams, setSearchParams]);
@@ -136,6 +134,12 @@ const DepositPage: React.FC = () => {
     const handleDeposit = async () => {
         if (!profile) {
             setMessage({ type: 'error', text: '請先登入' });
+            return;
+        }
+
+        const depositAmount = Number(amount);
+        if (!depositAmount || depositAmount < 1) {
+            setMessage({ type: 'error', text: '請輸入儲值金額' });
             return;
         }
 
@@ -152,10 +156,10 @@ const DepositPage: React.FC = () => {
                 },
                 body: JSON.stringify({
                     endpoint: '/api/payment/create-order',
-                    amount: 1,
+                    amount: depositAmount,
                     productName: '汪汪娛樂城儲值',
                     customerId: profile.id,
-                    paymentType: paymentMethod,
+                    paymentType: 'CreditCard',
                     customAmount: true,
                     clientBackURL: `${window.location.origin}/deposit`,
                 }),
@@ -164,11 +168,9 @@ const DepositPage: React.FC = () => {
             const data = await response.json();
 
             if (data.success && data.data?.transactionUrl) {
-                // 保存 authCode 及時間戳供回來後查詢
                 localStorage.setItem('pending_authCode', data.data.authCode);
                 localStorage.setItem('pending_tradeSeq', data.data.facTradeSeq);
                 localStorage.setItem('pending_time', String(Date.now()));
-                // 導向 GGCard 付款頁面
                 window.location.href = data.data.transactionUrl;
             } else {
                 throw new Error(data.error?.message || data.message || '建立訂單失敗');
@@ -218,36 +220,53 @@ const DepositPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* 付款方式選擇 */}
+            {/* 儲值金額 */}
             <div className="bg-white rounded-3xl p-5 shadow-md space-y-4">
-                <h2 className="text-lg font-bold text-gray-700">選擇付款方式</h2>
-                <div className="grid grid-cols-2 gap-3">
+                <h2 className="text-lg font-bold text-gray-700">儲值金額</h2>
+
+                {/* 快選金額 */}
+                <div className="grid grid-cols-3 gap-3">
+                    {AMOUNT_OPTIONS.map((opt) => (
+                        <button
+                            key={opt}
+                            onClick={() => { setAmount(String(opt)); setCustomAmount(false); }}
+                            className={`py-3 rounded-2xl border-2 font-semibold text-sm transition-all ${amount === String(opt) && !customAmount
+                                ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md'
+                                : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                                }`}
+                        >
+                            NT$ {opt.toLocaleString()}
+                        </button>
+                    ))}
+                </div>
+
+                {/* 自訂金額 */}
+                <div>
                     <button
-                        onClick={() => setPaymentMethod('CreditCard')}
-                        className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${paymentMethod === 'CreditCard'
-                            ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md'
-                            : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                            }`}
+                        onClick={() => { setCustomAmount(true); setAmount(''); }}
+                        className={`w-full text-left text-sm mb-2 ${customAmount ? 'text-blue-600 font-semibold' : 'text-gray-400'}`}
                     >
-                        <CreditCard size={24} />
-                        <span className="text-sm font-semibold">信用卡</span>
+                        自訂金額
                     </button>
-                    <button
-                        onClick={() => setPaymentMethod('ATM')}
-                        className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${paymentMethod === 'ATM'
-                            ? 'border-green-500 bg-green-50 text-green-700 shadow-md'
-                            : 'border-gray-200 text-gray-500 hover:border-gray-300'
-                            }`}
-                    >
-                        <Landmark size={24} />
-                        <span className="text-sm font-semibold">ATM 轉帳</span>
-                    </button>
+                    {customAmount && (
+                        <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-semibold">NT$</span>
+                            <input
+                                type="number"
+                                min="1"
+                                value={amount}
+                                onChange={(e) => setAmount(e.target.value)}
+                                placeholder="輸入金額"
+                                className="w-full pl-14 pr-4 py-3 border-2 border-blue-300 rounded-2xl text-lg font-semibold focus:outline-none focus:border-blue-500"
+                            />
+                        </div>
+                    )}
                 </div>
 
                 <button
                     onClick={handleDeposit}
-                    disabled={submitting || checking}
-                    className={`w-full text-white py-4 rounded-2xl font-bold text-lg shadow-lg transition-transform flex items-center justify-center gap-3 ${submitting || checking
+                    disabled={submitting || checking || !amount}
+                    className={`w-full text-white py-4 rounded-2xl font-bold text-lg shadow-lg transition-transform flex items-center justify-center gap-3 ${submitting || checking || !amount
                         ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:scale-105'
                         }`}
@@ -260,7 +279,7 @@ const DepositPage: React.FC = () => {
                     ) : (
                         <>
                             <CreditCard size={22} />
-                            前往儲值
+                            {amount ? `信用卡儲值 NT$ ${Number(amount).toLocaleString()}` : '請選擇金額'}
                         </>
                     )}
                 </button>
