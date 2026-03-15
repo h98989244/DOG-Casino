@@ -28,12 +28,20 @@ const DepositPage: React.FC = () => {
         localStorage.setItem('userProfile', JSON.stringify(user));
     };
 
-    // 從 GGCard 回來後，主動查詢訂單狀態
+    // 從付款頁面回來後，主動查詢訂單狀態
     useEffect(() => {
         const pendingAuthCode = localStorage.getItem('pending_authCode');
         const pendingTradeSeq = localStorage.getItem('pending_tradeSeq');
+        const pendingTime = localStorage.getItem('pending_time');
 
-        // 有 URL 參數或有待查詢的 authCode 時處理
+        // 超過 10 分鐘或無時間戳的待查訂單視為過期，靜默清除
+        if (pendingAuthCode && (!pendingTime || Date.now() - Number(pendingTime) > 10 * 60 * 1000)) {
+            localStorage.removeItem('pending_authCode');
+            localStorage.removeItem('pending_tradeSeq');
+            localStorage.removeItem('pending_time');
+            return;
+        }
+
         const result = searchParams.get('result');
 
         if (!pendingAuthCode) {
@@ -96,6 +104,7 @@ const DepositPage: React.FC = () => {
                     });
                     localStorage.removeItem('pending_authCode');
                     localStorage.removeItem('pending_tradeSeq');
+                    localStorage.removeItem('pending_time');
                     addToLocalBalance(Number(amount));
                     setTimeout(() => window.location.reload(), 1500);
                 } else if (data.data?.returnCode === '006') {
@@ -107,6 +116,7 @@ const DepositPage: React.FC = () => {
                     });
                     localStorage.removeItem('pending_authCode');
                     localStorage.removeItem('pending_tradeSeq');
+                    localStorage.removeItem('pending_time');
                 }
             } catch (err) {
                 console.error('查詢訂單失敗:', err);
@@ -154,9 +164,10 @@ const DepositPage: React.FC = () => {
             const data = await response.json();
 
             if (data.success && data.data?.transactionUrl) {
-                // 保存 authCode 供回來後查詢
+                // 保存 authCode 及時間戳供回來後查詢
                 localStorage.setItem('pending_authCode', data.data.authCode);
                 localStorage.setItem('pending_tradeSeq', data.data.facTradeSeq);
+                localStorage.setItem('pending_time', String(Date.now()));
                 // 導向 GGCard 付款頁面
                 window.location.href = data.data.transactionUrl;
             } else {
